@@ -4,12 +4,9 @@ import tensorflow as tf
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from scipy.special import rel_entr
 from scipy.stats import wasserstein_distance
-
-
 
 import tensorflow as tf
 import numpy as np
