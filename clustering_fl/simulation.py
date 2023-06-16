@@ -2,9 +2,21 @@ from client import ClientBase
 from server import NeuralMatch
 import pickle
 import flwr as fl
+import os
+
+try:
+	os.remove('./clustering_fl/data/history_simulation.pickle')
+except FileNotFoundError:
+	pass
+
+try:
+	os.remove('./clustering_fl/acc.csv')
+except FileNotFoundError:
+	pass
+
 
 n_clients = 7
-n_rounds = 2
+n_rounds = 10
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid))

@@ -29,11 +29,13 @@ class ClientBase(fl.client.NumPyClient):
 
 	def load_data(self):
 		with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
-			train = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1000)
+			data = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1200, replace=True) #numero de imagens limitadas por conta de problema na memoria
+			train = data[0:1000]
+			test = data[1000:]
 	    
-		with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
-			test = pd.read_csv(test_file, dtype = np.float32)
-			test = test.rename({'7': 'label'}, axis = 1)
+		#with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
+		#	test = pd.read_csv(test_file, dtype = np.float32)
+		#	test = test.rename({'7': 'label'}, axis = 1)
 	        
 		y_train = train['label'].values
 		train.drop('label', axis=1, inplace=True)

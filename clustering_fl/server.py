@@ -38,15 +38,6 @@ actv = []
 data_path = 'clustering_fl/data'
 n_clients = 7
 
-#gerando ruido para testar o CKA
-#noises = []
-#for i in range(100):
-#
-#  noises.append((np.random.uniform(0, 255, 28*28)))
-#
-##data_test_cka = torch.from_numpy(np.array(noises))
-#x_servidor = np.array(noises)
-
 data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
 x_servidor = pd.DataFrame()
 
