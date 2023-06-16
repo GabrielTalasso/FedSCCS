@@ -15,6 +15,7 @@ import random
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = 'clustering_fl/data'
 n_clients = 7
+local_epochs = 1
 
 
 class ClientBase(fl.client.NumPyClient):
@@ -77,7 +78,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.model.set_weights(parameters)
 		h = self.model.fit(self.x_train, self.y_train, 
 		                                validation_data = (self.x_test, self.y_test),
-																		verbose=1, epochs=1)
+																		verbose=1, epochs=local_epochs)
 
 	
 		# '''

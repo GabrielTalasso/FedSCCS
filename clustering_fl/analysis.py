@@ -1,5 +1,7 @@
 import pickle
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def cka(X, Y):
     # Implements linear CKA as in Kornblith et al. (2019)
@@ -29,6 +31,7 @@ actvs = history.metrics_distributed['actv_last'][0][1]
  #ativações de todos os clientes na ultima camada no ultimo round
 
 matrix = np.zeros((len(actvs), len(actvs)))
+print(clientes)
 
 #comparando todos com todos
 for i , a in enumerate(actvs):
@@ -48,3 +51,6 @@ nome_arquivo = "clustering_fl/data/ckas.pickle"
 # Salva a matriz no arquivo pickle
 with open(nome_arquivo, "wb") as f:
     pickle.dump(matrix, f)
+
+sns.heatmap(matrix, vmin = 0, vmax = 1)
+plt.show()

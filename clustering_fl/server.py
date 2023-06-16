@@ -38,30 +38,29 @@ actv = []
 data_path = 'clustering_fl/data'
 n_clients = 7
 
+#gerando ruido para testar o CKA
+#noises = []
+#for i in range(100):
+#
+#  noises.append((np.random.uniform(0, 255, 28*28)))
+#
+##data_test_cka = torch.from_numpy(np.array(noises))
+#x_servidor = np.array(noises)
+
 data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
 x_servidor = pd.DataFrame()
 
 for i in range(n_clients):
   with open(f'{data_path}/client{i+1}.csv', 'rb') as train_file:
     data_client_i = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1) 
-    
-    #x_servidor = x_servidor.append(data_client_i.sample(int(len(data_client_i)*data_perc)))
-    x_servidor = data_client_i.sample(100)
+    x_servidor = pd.concat([data_client_i.sample(int(len(data_client_i)*data_perc)), x_servidor],
+                           ignore_index = True)
 
 y_servidor =  x_servidor['label'].values
 x_servidor.drop('label', axis=1, inplace=True)
 # train.drop('subject', axis=1, inplace=True)
 # train.drop('trial', axis=1, inplace=True)
 x_servidor =  x_servidor.values
-
-#gerando ruido para testar o CKA
-noises = []
-for i in range(100):
-
-  noises.append((np.random.uniform(0, 255, 28*28)))
-
-#data_test_cka = torch.from_numpy(np.array(noises))
-x_servidor = np.array(noises)
 
 def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
