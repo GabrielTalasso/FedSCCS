@@ -14,8 +14,7 @@ import random
 
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = 'clustering_fl/data'
-n_clients = 7
-local_epochs = 1
+local_epochs = 10
 
 
 class ClientBase(fl.client.NumPyClient):
@@ -30,7 +29,7 @@ class ClientBase(fl.client.NumPyClient):
 
 	def load_data(self):
 		with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
-			train = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1) 
+			train = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1000)
 	    
 		with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
 			test = pd.read_csv(test_file, dtype = np.float32)
