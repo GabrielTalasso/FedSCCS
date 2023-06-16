@@ -1,9 +1,10 @@
 from client import ClientBase
 from server import NeuralMatch
+import pickle
 import flwr as fl
 
 n_clients = 7
-n_rounds = 10
+n_rounds = 2
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid))
@@ -12,6 +13,11 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 								num_clients=n_clients, 
 								strategy=NeuralMatch(fraction_fit=1),
 								config=fl.server.ServerConfig(n_rounds))
+
+
+
+with open('history_simulation.pickle', 'wb') as file:
+    pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 #0
 #Salvamento automatico no git

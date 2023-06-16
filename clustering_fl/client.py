@@ -77,7 +77,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.model.set_weights(parameters)
 		h = self.model.fit(self.x_train, self.y_train, 
 		                                validation_data = (self.x_test, self.y_test),
-																		verbose=1, epochs=10)
+																		verbose=1, epochs=1)
 
 	
 		# '''

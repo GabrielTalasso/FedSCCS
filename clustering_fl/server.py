@@ -2,6 +2,7 @@
 
 import flwr as fl
 import tensorflow as tf
+import torch
 from logging import WARNING
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.strategy.strategy import Strategy
@@ -52,6 +53,15 @@ x_servidor.drop('label', axis=1, inplace=True)
 # train.drop('subject', axis=1, inplace=True)
 # train.drop('trial', axis=1, inplace=True)
 x_servidor =  x_servidor.values
+
+#gerando ruido para testar o CKA
+noises = []
+for i in range(100):
+
+  noises.append((np.random.uniform(0, 255, 28*28)))
+
+#data_test_cka = torch.from_numpy(np.array(noises))
+x_servidor = np.array(noises)
 
 def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
