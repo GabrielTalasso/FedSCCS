@@ -4,8 +4,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-#for i in range(7):
-#  os.remove(f'./clustering_fl/data/actv_{i}')
 
 def cka(X, Y):
     # Implements linear CKA as in Kornblith et al. (2019)

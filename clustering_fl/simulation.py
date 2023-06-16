@@ -10,7 +10,7 @@ except FileNotFoundError:
 	pass
 
 try:
-	os.remove('./clustering_fl/acc.csv')
+	os.remove('~/clustering_fl/acc.csv')
 except FileNotFoundError:
 	pass
 
