@@ -3,6 +3,7 @@ import os
 import random
 import time
 
+#from dataset_utils.utils import save_dataloaders
 from utils import save_dataloaders
 
 trainloaders = []
@@ -17,7 +18,7 @@ def parse_arguments():
     argParser.add_argument("--num_clients", help="Number of clients", default=10)
     argParser.add_argument("--batch_size", help="Batch size", default=32)
     argParser.add_argument("--data_dir", help="Dataset directory", default="dataset/")
-    argParser.add_argument("--dataset", help="Options: Cifar10, Mnist", default="CIFAR10")
+    argParser.add_argument("--dataset", help="Options: Cifar10, Mnist", default="MNIST")
     argParser.add_argument("--num_classes", help="Number of dataset classes to use", default=10)
     argParser.add_argument("--balance", help="User dataset balanced", default=False)
     argParser.add_argument("--partition", help="Dataset partition: dir or pat", default="dir")

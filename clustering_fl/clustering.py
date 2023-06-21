@@ -21,4 +21,3 @@ idx = spc.fcluster(linkage, 1.2, 'distance' )
 
 dendrogram(linkage, color_threshold=1.2)
 plt.show()
-

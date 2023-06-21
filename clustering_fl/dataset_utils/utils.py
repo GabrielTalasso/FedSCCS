@@ -126,7 +126,7 @@ def split_data(dataidx_map, num_clients, train_size):
 
     return train_data, test_data
 
-def save_dataloaders(dataset_name="CIFAR10", num_clients=10, num_classes=10, niid=True, balance=False, partition="dir",
+def save_dataloaders(dataset_name="MNIST", num_clients=10, num_classes=10, niid=True, balance=False, partition="dir",
                  class_per_client=10,
                  batch_size=10, train_size=0.8, alpha=0.1, dataset_dir="./dataset/", sim_id=0):
 
