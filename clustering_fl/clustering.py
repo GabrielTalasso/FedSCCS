@@ -10,7 +10,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 
 sns.set()
 
-file_path = './clustering_fl/data/ckas.pickle'
+file_path = './data/ckas.pickle'
 
 with open(file_path, "rb") as f:
   ckas = pickle.load(f)

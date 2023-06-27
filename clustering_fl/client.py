@@ -13,8 +13,8 @@ import numpy as np
 import random
 
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
-data_path = 'clustering_fl/data'
-local_epochs = 10
+data_path = './data'
+local_epochs = 2
 
 
 class ClientBase(fl.client.NumPyClient):
@@ -28,32 +28,45 @@ class ClientBase(fl.client.NumPyClient):
 		print('++++++++++++++++++++++++++')
 
 	def load_data(self):
-		with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
-			data = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1200, replace=True) #numero de imagens limitadas por conta de problema na memoria
-			train = data[0:1000]
-			test = data[1000:]
-	    
-		#with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
-		#	test = pd.read_csv(test_file, dtype = np.float32)
-		#	test = test.rename({'7': 'label'}, axis = 1)
-	        
-		y_train = train['label'].values
-		train.drop('label', axis=1, inplace=True)
-		# train.drop('subject', axis=1, inplace=True)
-		# train.drop('trial', axis=1, inplace=True)
-		x_train = train.values
+		#with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
+		#	data = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1200, replace=True) #numero de imagens limitadas por conta de problema na memoria
+		#	train = data[0:1000]
+		#	test = data[1000:]
+	    #
+		##with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
+		##	test = pd.read_csv(test_file, dtype = np.float32)
+		##	test = test.rename({'7': 'label'}, axis = 1)
+	    #   
+		#y_train = train['label'].values
+		#train.drop('label', axis=1, inplace=True)
+		## train.drop('subject', axis=1, inplace=True)
+		## train.drop('trial', axis=1, inplace=True)
+		#x_train = train.values
+		#y_test = test['label'].values
+		#test.drop('label', axis=1, inplace=True)
+		## test.drop('subject', axis=1, inplace=True)
+		## test.drop('trial', axis=1, inplace=True)
+		#x_test = test.values
 
-		y_test = test['label'].values
-		test.drop('label', axis=1, inplace=True)
-		# test.drop('subject', axis=1, inplace=True)
-		# test.drop('trial', axis=1, inplace=True)
-		x_test = test.values
+		with open(f'./data/25/idx_train_{self.cid}.pickle', 'rb') as file:
+			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+			f = pickle.load(file)
+			x_train = x_train[f]
+			y_train = y_train[f]
+
+		with open(f'./data/25/idx_test_{self.cid}.pickle', 'rb') as file:
+			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+			f = pickle.load(file)
+			x_test = x_test[f]
+			y_test = y_test[f]
+
 	    
 		return x_train, y_train, x_test, y_test
 
 	def create_model(self):
 		model = tf.keras.models.Sequential()
-		model.add(tf.keras.layers.InputLayer(input_shape=(self.x_train.shape[1],)))
+
+		model.add(tf.keras.layers.Flatten(input_shape=(28,28,1)))
 
 		model.add(tf.keras.layers.Dense(128, activation='relu'))
 	
@@ -94,7 +107,7 @@ class ClientBase(fl.client.NumPyClient):
 				# "ativacoes" : var_ativacoes
 		}
 		self.round += 1
-		with open('acc.csv', 'a') as arquivo:
+		with open('results/acc.csv', 'a') as arquivo:
 
 			arquivo.write(f"{self.round}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 	 

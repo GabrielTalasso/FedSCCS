@@ -5,18 +5,18 @@ import flwr as fl
 import os
 
 try:
-	os.remove('./clustering_fl/data/history_simulation.pickle')
+	os.remove('./data/history_simulation.pickle')
 except FileNotFoundError:
 	pass
 
 try:
-	os.remove('~/clustering_fl/acc.csv')
+	os.remove('./acc.csv')
 except FileNotFoundError:
 	pass
 
 
-n_clients = 7
-n_rounds = 10
+n_clients = 25
+n_rounds = 2
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid))
@@ -28,7 +28,7 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 
 
 
-with open('clustering_fl/data/history_simulation.pickle', 'wb') as file:
+with open('./data/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 #0

@@ -35,23 +35,27 @@ import pandas as pd
 #como salvar as ativações sem ser utilizando esse dicionario global?
 
 actv = []
-data_path = 'clustering_fl/data'
-n_clients = 7
+data_path = './data'
+n_clients = 25
 
-data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
-x_servidor = pd.DataFrame()
-
-for i in range(n_clients):
-  with open(f'{data_path}/client{i+1}.csv', 'rb') as train_file:
-    data_client_i = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1) 
-    x_servidor = pd.concat([data_client_i.sample(int(len(data_client_i)*data_perc)), x_servidor],
-                           ignore_index = True)
-
-y_servidor =  x_servidor['label'].values
-x_servidor.drop('label', axis=1, inplace=True)
+(x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
+x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]
+x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28)
+#
+#data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
+#x_servidor = pd.DataFrame()
+#
+#for i in range(n_clients):
+#  with open(f'{data_path}/client{i+1}.csv', 'rb') as train_file:
+#    data_client_i = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1) 
+#    x_servidor = pd.concat([data_client_i.sample(int(len(data_client_i)*data_perc)), x_servidor],
+#                           ignore_index = True)
+#
+#y_servidor =  x_servidor['label'].values
+#x_servidor.drop('label', axis=1, inplace=True)
 # train.drop('subject', axis=1, inplace=True)
 # train.drop('trial', axis=1, inplace=True)
-x_servidor =  x_servidor.values
+#x_servidor =  x_servidor.values
 
 def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
@@ -68,7 +72,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     
     def create_model():
       model = tf.keras.models.Sequential()
-      model.add(tf.keras.layers.InputLayer(input_shape=(x_servidor.shape[1],)))
+      model.add(tf.keras.layers.Flatten(input_shape=(28,28,1)))
   
       model.add(tf.keras.layers.Dense(128, activation='relu'))
   
