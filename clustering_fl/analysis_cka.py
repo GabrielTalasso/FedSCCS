@@ -22,7 +22,7 @@ def cka(X, Y):
     return (YTX ** 2).sum() / np.sqrt((XTX ** 2).sum() * (YTY ** 2).sum())
 
 #abre a simulação ja executada
-with open('clustering_fl/data/history_simulation.pickle', 'rb') as file:
+with open('./results/history_simulation.pickle', 'rb') as file:
     history = pickle.load(file)
 
 #salva os id dos clientes, na ordem que foram treinados
@@ -33,6 +33,7 @@ actvs = history.metrics_distributed['actv_last'][0][1]
  #ativações de todos os clientes na ultima camada no ultimo round
 
 matrix = np.zeros((len(actvs), len(actvs)))
+print(clientes)
 
 #comparando todos com todos
 for i , a in enumerate(actvs):
@@ -45,10 +46,10 @@ for i , a in enumerate(actvs):
 
 #salvando as ativações
 for i in range(7):
-  with open(f'clustering_fl/data/acvt_{i}', "wb") as f:
+  with open(f'./data/acvt_{i}', "wb") as f:
       pickle.dump(actvs[i], f)
 
-nome_arquivo = "clustering_fl/data/ckas.pickle"
+nome_arquivo = "./data/ckas.pickle"
 # Salva a matriz no arquivo pickle
 with open(nome_arquivo, "wb") as f:
     pickle.dump(matrix, f)

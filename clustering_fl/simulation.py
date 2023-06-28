@@ -15,7 +15,7 @@ except FileNotFoundError:
 	pass
 
 
-n_clients = 10
+n_clients = 25
 n_rounds = 2
 
 def funcao_cliente(cid):
@@ -28,7 +28,7 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 
 
 
-with open('./data/history_simulation.pickle', 'wb') as file:
+with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 #0

@@ -17,7 +17,8 @@ with open(file_path, "rb") as f:
 
 pdist = spc.distance.pdist(ckas)
 linkage = spc.linkage(pdist, method='ward')
-idx = spc.fcluster(linkage, 1.2, 'distance' )
+idx = spc.fcluster(linkage, 1.8, 'distance' )
+print(idx)
 
 dendrogram(linkage, color_threshold=1.2)
 plt.show()
