@@ -72,7 +72,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     
     def create_model():
       model = tf.keras.models.Sequential()
-      model.add(tf.keras.layers.Flatten(input_shape=(28,28,1)))
+      model.add(tf.keras.layers.Flatten(input_shape=(784, )))
   
       model.add(tf.keras.layers.Dense(128, activation='relu'))
   

@@ -49,15 +49,18 @@ class ClientBase(fl.client.NumPyClient):
 		#x_test = test.values
 
 		with open(f'./data/25/idx_train_{self.cid}.pickle', 'rb') as file:
-			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_train = x_train[f]
+			x_train = x_train.reshape(x_train.shape[0] , 28*28)
 			y_train = y_train[f]
 
 		with open(f'./data/25/idx_test_{self.cid}.pickle', 'rb') as file:
-			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+			(_ , _), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_test = x_test[f]
+			x_test = x_test.reshape(x_test.shape[0] , 28*28)
+			print(x_train.shape)
 			y_test = y_test[f]
 
 	    
@@ -66,7 +69,7 @@ class ClientBase(fl.client.NumPyClient):
 	def create_model(self):
 		model = tf.keras.models.Sequential()
 
-		model.add(tf.keras.layers.Flatten(input_shape=(28,28,1)))
+		model.add(tf.keras.layers.Flatten(input_shape=(784, )))
 
 		model.add(tf.keras.layers.Dense(128, activation='relu'))
 	
