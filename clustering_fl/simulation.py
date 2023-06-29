@@ -5,18 +5,18 @@ import flwr as fl
 import os
 
 try:
-	os.remove('./data/history_simulation.pickle')
+	os.remove('./results/history_simulation.pickle')
 except FileNotFoundError:
 	pass
 
 try:
-	os.remove('./acc.csv')
+	os.remove('./results/acc.csv')
 except FileNotFoundError:
 	pass
 
 
 n_clients = 25
-n_rounds = 2
+n_rounds = 6
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid))
@@ -31,17 +31,13 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-#0
-#Salvamento automatico no git
-#calculo do CKA no servidor (ou na simulação)
-#usar ruido para o calculo do CKA
-#usar conjunto do cliente no teste!
 
-#rodar com qualquer numero de clientes e nao iid - falar com Filipe
 
 #1)
 #fazer clustering com base no CKA por aqui
 
-#2)
-#treinar os clientes por cluster
+#- passar a parte do calculo do clustering para o servidor
+#- como treinar varios modelos no servidor?
+
+
 #treina algumas rodadas -> clusteriza -> treina os clusters

@@ -31,12 +31,14 @@ import matplotlib.pyplot as plt
 import keras.backend as K
 
 import pandas as pd
+from server_utils import *
 
 #como salvar as ativações sem ser utilizando esse dicionario global?
 
 actv = []
 data_path = './data'
 n_clients = 25
+clustering = True
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]
@@ -95,6 +97,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     # Convert results
     weights_results = []
     for _, fit_res in results:
+
       client_id = str(fit_res.metrics['cliente_id'])
       parametros_client = fit_res.parameters
 
@@ -105,9 +108,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       weights_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
     lista_last = []
-    lista_onetolast = []
-    lista_first = []
-    lista_second = []
 
     for w in lista_modelos['models']:
 
@@ -115,21 +115,29 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       modelo.predict(x_servidor) 
 
       activation_last = get_layer_outputs(modelo, modelo.layers[-1], x_servidor, 0)
-      activation_onetolast = get_layer_outputs(modelo, modelo.layers[-2], x_servidor, 0)
-
-      activation_first = get_layer_outputs(modelo, modelo.layers[0], x_servidor, 0) 
-      activation_second = get_layer_outputs(modelo, modelo.layers[1], x_servidor, 0)
-
       lista_last.append(activation_last)
-      lista_onetolast.append(activation_onetolast)
-      lista_first.append(activation_first)
-      lista_second.append(activation_second)
 
     lista_modelos['actv_last'] = lista_last
-    lista_modelos['actv_onetolast'] = lista_onetolast
-    lista_modelos['actv_first'] = lista_first
-    lista_modelos['actv_second'] = lista_second
 
+    actvs = lista_last
+
+    matrix = np.zeros((len(actvs), len(actvs)))
+
+    for i , a in enumerate(actvs):
+      for j, b in enumerate(actvs):
+
+        x = int(lista_modelos['cids'][i])
+        y = int(lista_modelos['cids'][j])
+
+        matrix[x][y] = cka(a, b)
+
+    if clustering:
+       
+       if server_round%2 == 0:
+       
+        idx = server_Hclusters(matrix, 5)
+       
+       
     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
     actv.append(lista_modelos)
@@ -165,10 +173,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
         metrics_aggregated = {'str':server_round, 
                               'cids' : actv[0]['cids'],
-                              'actv_last' : actv[0]['actv_last'] ,
-                              'actv_onetolast': actv[0]['actv_onetolast'],
-                              'actv_first': actv[0]['actv_first'],
-                              'actv_second': actv[0]['actv_second']}
+                              'actv_last' : actv[0]['actv_last']}
 
 
         return loss_aggregated, metrics_aggregated
