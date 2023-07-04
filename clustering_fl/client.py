@@ -15,6 +15,7 @@ import random
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = './data'
 local_epochs = 2
+n_clients = 10
 
 
 class ClientBase(fl.client.NumPyClient):
@@ -25,7 +26,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.x_train, self.y_train, self.x_test, self.y_test = self.load_data()
 		self.model     = self.create_model()
 		self.round = 0
-		print('++++++++++++++++++++++++++')
+		#print('++++++++++++++++++++++++++')
 
 	def load_data(self):
 		#with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
@@ -48,19 +49,19 @@ class ClientBase(fl.client.NumPyClient):
 		## test.drop('trial', axis=1, inplace=True)
 		#x_test = test.values
 
-		with open(f'./data/25/idx_train_{self.cid}.pickle', 'rb') as file:
+		with open(f'./data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as file:
 			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_train = x_train[f]
 			x_train = x_train.reshape(x_train.shape[0] , 28*28)
 			y_train = y_train[f]
 
-		with open(f'./data/25/idx_test_{self.cid}.pickle', 'rb') as file:
+		with open(f'./data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as file:
 			(_ , _), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_test = x_test[f]
 			x_test = x_test.reshape(x_test.shape[0] , 28*28)
-			print(x_train.shape)
+			#print(x_train.shape)
 			y_test = y_test[f]
 
 	    

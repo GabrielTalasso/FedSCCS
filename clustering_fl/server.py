@@ -37,8 +37,9 @@ from server_utils import *
 
 actv = []
 data_path = './data'
-n_clients = 25
+n_clients = 10
 clustering = True
+K = 5
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]
@@ -63,12 +64,17 @@ def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
     return layer_fn(input_data)
 
+modelos = []
+idx = list(np.zeros(n_clients))
+
 class NeuralMatch(fl.server.strategy.FedAvg):
 
   global x_servidor
   global y_servidor
-
+  global modelos
   global actv
+  global idx
+  idx = list(np.zeros(n_clients))
 
   def aggregate_fit(self, server_round, results, failures):
     
@@ -103,8 +109,12 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
       #salvando os modelos (pesos)
       lista_modelos['cids'].append(client_id)
-      lista_modelos['models'].append(parameters_to_ndarrays(parametros_client))
 
+      #idx_cluster = idx[i]
+      #lista_modelos['models'][idx_cluster].append(parameters_to_ndarrays(parametros_client))
+
+      lista_modelos['models'].append(parameters_to_ndarrays(parametros_client))
+      
       weights_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
     lista_last = []
@@ -135,9 +145,10 @@ class NeuralMatch(fl.server.strategy.FedAvg):
        
        if server_round%2 == 0:
        
-        idx = server_Hclusters(matrix, 5)
-       
-       
+        idx = server_Hclusters(matrix, K, plot_dendrogram=True)
+
+        
+    #criar um for para cada cluster ter um modelo   
     parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
     actv.append(lista_modelos)

@@ -9,10 +9,10 @@ from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as spc
 from scipy.cluster.hierarchy import dendrogram, linkage
 
-def server_Hclusters(matrix, k = 3):
+def server_Hclusters(matrix, k = 3, plot_dendrogram = False):
+
     pdist = spc.distance.pdist(matrix)
     linkage = spc.linkage(pdist, method='ward')
-    idx = spc.fcluster(linkage, 1.8, 'distance' )
     min_link = linkage[0][2]
     max_link = linkage[-1][2]
 
@@ -23,9 +23,12 @@ def server_Hclusters(matrix, k = 3):
             th = i
 
     idx = spc.fcluster(linkage, th, 'distance' )
+    print(idx)
 
-    #dendrogram(linkage, color_threshold=th)
-    #plt.show()
+    if plot_dendrogram:
+
+        dendrogram(linkage, color_threshold=th)
+        plt.show()
 
     return idx
 
