@@ -199,6 +199,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         self, server_round, parameters, client_manager):
         """Configure the next round of training."""
         config = {}
+        global idx 
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
@@ -212,7 +213,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
         # Return client/config pairs
 
-        if server_round <= 2:
+        if server_round == 1:
            fit_ins = FitIns(parameters, config)
            return [(client, fit_ins) for client in clients]
         else:
@@ -227,6 +228,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           return []
       # Parameters and config
       config = {}
+      global idx 
       if self.on_evaluate_config_fn is not None:
           # Custom evaluation config function provided
           config = self.on_evaluate_config_fn(server_round)
@@ -239,7 +241,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           num_clients=sample_size, min_num_clients=min_num_clients
       )
       # Return client/config pairs
-      if server_round <= 2:
+      if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]
       else:
