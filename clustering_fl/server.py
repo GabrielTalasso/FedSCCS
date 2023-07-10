@@ -39,7 +39,7 @@ actv = []
 data_path = './data'
 n_clients = 10
 clustering = True
-K = 5
+n_clusters = 5
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]
@@ -74,10 +74,9 @@ class NeuralMatch(fl.server.strategy.FedAvg):
   global modelos
   global actv
   global idx
-  idx = list(np.zeros(n_clients))
 
   def aggregate_fit(self, server_round, results, failures):
-    
+    global idx  
     def create_model():
       model = tf.keras.models.Sequential()
       model.add(tf.keras.layers.Flatten(input_shape=(784, )))
@@ -97,35 +96,40 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     modelo = create_model()
 
     """Aggregate fit results using weighted average."""
-    lista_modelos = {'cids': [], 'models' : []}
-
+    lista_modelos = {'cids': [], 'models' : {}, 'cluster': []}
 
     # Convert results
-    weights_results = []
+    weights_results = {}
     for _, fit_res in results:
 
       client_id = str(fit_res.metrics['cliente_id'])
       parametros_client = fit_res.parameters
 
-      #salvando os modelos (pesos)
       lista_modelos['cids'].append(client_id)
 
-      #idx_cluster = idx[i]
-      #lista_modelos['models'][idx_cluster].append(parameters_to_ndarrays(parametros_client))
+      idx_cluster = idx[int(client_id)]
+      if str(idx_cluster) not in lista_modelos['models'].keys(): 
+        lista_modelos['models'][str(idx_cluster)] = []
+      lista_modelos['models'][str(idx_cluster)].append(parameters_to_ndarrays(parametros_client))
 
-      lista_modelos['models'].append(parameters_to_ndarrays(parametros_client))
+      #lista_modelos['models'].append(parameters_to_ndarrays(parametros_client))
+
+      #if server_round > 2:
+      #  print(idx)
+      #  lista_modelos['cluster'].append(idx[int(client_id)])
       
-      weights_results.append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
+      if str(idx_cluster) not in weights_results.keys():
+          weights_results[str(idx_cluster)] = []
+      weights_results[str(idx_cluster)].append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
     lista_last = []
+    for idx_cluster in lista_modelos['models'].keys():
+      for w in lista_modelos['models'][idx_cluster]:
+        modelo.set_weights(w)
+        modelo.predict(x_servidor) 
 
-    for w in lista_modelos['models']:
-
-      modelo.set_weights(w)
-      modelo.predict(x_servidor) 
-
-      activation_last = get_layer_outputs(modelo, modelo.layers[-1], x_servidor, 0)
-      lista_last.append(activation_last)
+        activation_last = get_layer_outputs(modelo, modelo.layers[-1], x_servidor, 0)
+        lista_last.append(activation_last)
 
     lista_modelos['actv_last'] = lista_last
 
@@ -140,16 +144,18 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         y = int(lista_modelos['cids'][j])
 
         matrix[x][y] = cka(a, b)
+        #print(matrix)
 
     if clustering:
-       
-       if server_round%2 == 0:
-       
-        idx = server_Hclusters(matrix, K, plot_dendrogram=True)
-
+          
+      if server_round%2 == 0:
+          
+        idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
         
-    #criar um for para cada cluster ter um modelo   
-    parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+    #criar um for para cada cluster ter um modelo
+    parameters_aggregated = {}
+    for idx_cluster in weights_results.keys():   
+      parameters_aggregated[idx_cluster] = ndarrays_to_parameters(aggregate(weights_results[idx_cluster]))
 
     actv.append(lista_modelos)
 
@@ -188,3 +194,55 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
 
         return loss_aggregated, metrics_aggregated
+  
+  def configure_fit(
+        self, server_round, parameters, client_manager):
+        """Configure the next round of training."""
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(server_round)
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        # Return client/config pairs
+
+        if server_round <= 2:
+           fit_ins = FitIns(parameters, config)
+           return [(client, fit_ins) for client in clients]
+        else:
+          print(parameters.keys())
+          return [(client, FitIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
+  
+  def configure_evaluate(
+      self, server_round, parameters, client_manager):
+      """Configure the next round of evaluation."""
+      # Do not configure federated evaluation if fraction eval is 0.
+      if self.fraction_evaluate == 0.0:
+          return []
+      # Parameters and config
+      config = {}
+      if self.on_evaluate_config_fn is not None:
+          # Custom evaluation config function provided
+          config = self.on_evaluate_config_fn(server_round)
+
+      # Sample clients
+      sample_size, min_num_clients = self.num_evaluation_clients(
+          client_manager.num_available()
+      )
+      clients = client_manager.sample(
+          num_clients=sample_size, min_num_clients=min_num_clients
+      )
+      # Return client/config pairs
+      if server_round <= 2:
+        evaluate_ins = EvaluateIns(parameters['0.0'], config)
+        return [(client, evaluate_ins) for client in clients]
+      else:
+        return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
+      #print(parameters)
+      #return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
