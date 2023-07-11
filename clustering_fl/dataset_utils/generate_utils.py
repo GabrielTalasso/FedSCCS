@@ -8,6 +8,7 @@ batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
 alpha = 0.1 # for Dirichlet distribution
+list_idx = []
 
 def check(config_path, train_path, test_path, num_clients, num_classes, niid=False, 
         balance=True, partition=None):
@@ -103,8 +104,10 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
         raise NotImplementedError
 
     # assign data
+    global list_idx
     for client in range(num_clients):
         idxs = dataidx_map[client]
+        list_idx.append(idxs)
         X[client] = dataset_content[idxs]
         y[client] = dataset_label[idxs]
 
@@ -120,7 +123,7 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
         print(f"\t\t Samples of labels: ", [i for i in statistic[client]])
         print("-" * 50)
 
-    return X, y, statistic
+    return X, y, statistic, list_idx
 
 
 def split_data(X, y):
@@ -161,16 +164,30 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
 
     # gc.collect()
     print("Saving to disk.\n")
+    print( len(list_idx[0] ))
+
+
+    train_list_idx = []
+    test_list_idx = []
+    for i in list_idx:
+        np.random.shuffle(i)
+        train_list_idx.append(i[:int(len(i)*train_size)])
+        test_list_idx.append(i[int(len(i)*train_size):])
+
+    #print(train_list_idx[-1][-10:])
+    #print(test_list_idx[-1][-10:])
 
     train_path = './data/20/'
     test_path = './data/20/'
-
+    import pickle
     for idx, train_dict in enumerate(train_data):
         with open(train_path +'idx_train_' + str(idx) + '.pickle', 'wb') as f:
-            np.savez_compressed(f, data=train_dict)
+            #np.savez_compressed(f, data=train_dict)
+            pickle.dump(train_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
     for idx, test_dict in enumerate(test_data):
         with open(test_path +'idx_test_'+ str(idx) + '.pickle', 'wb') as f:
-            np.savez_compressed(f, data=test_dict)
+            #np.savez_compressed(f, data=test_dict)
+            pickle.dump(test_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
     with open(config_path, 'w') as f:
         ujson.dump(config, f)
 

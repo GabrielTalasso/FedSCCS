@@ -14,7 +14,6 @@ try:
 except FileNotFoundError:
 	pass
 
-
 n_clients = 20
 n_rounds = 10
 

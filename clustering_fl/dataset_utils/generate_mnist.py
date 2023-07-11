@@ -66,7 +66,7 @@ def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
     #     idx = dataset_label == i
     #     dataset.append(dataset_image[idx])
 
-    X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
+    X, y, statistic, list_idx = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
                                     niid, balance, partition)
     train_data, test_data = split_data(X, y)
     save_file(config_path, train_path, test_path, train_data, test_data, num_clients, num_classes, 
@@ -79,3 +79,4 @@ if __name__ == "__main__":
     partition = sys.argv[3] if sys.argv[3] != "-" else None
 
     generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
+    

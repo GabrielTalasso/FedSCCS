@@ -5,6 +5,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
+with open(f'./data/20/idx_train_0.pickle', 'rb') as file:
+			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
+			f = pickle.load(file)
+			x_train = x_train[f]
+			x_train = x_train.reshape(x_train.shape[0] , 28*28)
+			y_train = y_train[f]
+                   
+print(f)
+
 acc =  pd.read_csv('./results/acc.csv', names=['_', 'client', 'acc', 'loss']).drop('_', axis = 1)
 acc_fedavg = pd.read_csv('./results/acc_fedavg.csv', names=['_', 'client', 'acc', 'loss']).drop('_', axis = 1)
 
