@@ -14,8 +14,8 @@ import random
 
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = './data'
-local_epochs = 2
-n_clients = 10
+local_epochs = 1
+n_clients = 20
 
 
 class ClientBase(fl.client.NumPyClient):

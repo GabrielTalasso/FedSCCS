@@ -37,7 +37,7 @@ from server_utils import *
 
 actv = []
 data_path = './data'
-n_clients = 10
+n_clients = 20
 clustering = True
 n_clusters = 5
 
@@ -148,7 +148,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         #print(matrix)
 
     if clustering:
-      if (server_round) == 1 or (server_round == 2) or (server_round%10 == 0):
+      if (server_round) == 1 or (server_round == 2) or (server_round%50 == 0):
         idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
         
     #criar um for para cada cluster ter um modelo
