@@ -177,17 +177,41 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
     #print(train_list_idx[-1][-10:])
     #print(test_list_idx[-1][-10:])
 
+    for tri in range(len(train_list_idx)):
+        for id in train_list_idx[tri]:
+            if id >=60000:
+                train_list_idx[tri].remove(id)
+                train_list_idx[tri] = train_list_idx[tri]
+
+    for tri in range(len(test_list_idx)):
+        for id in test_list_idx[tri]:
+            if id >=60000:
+                test_list_idx[tri].remove(id)
+                test_list_idx[tri] = test_list_idx[tri]
+
+
+
     train_path = './data/20/'
     test_path = './data/20/'
     import pickle
     for idx, train_dict in enumerate(train_data):
         with open(train_path +'idx_train_' + str(idx) + '.pickle', 'wb') as f:
             #np.savez_compressed(f, data=train_dict)
+
+            for id in train_list_idx[idx]:
+                if id >=60000:
+                    train_list_idx[idx].remove(id)
+
             pickle.dump(train_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
     for idx, test_dict in enumerate(test_data):
         with open(test_path +'idx_test_'+ str(idx) + '.pickle', 'wb') as f:
             #np.savez_compressed(f, data=test_dict)
             pickle.dump(test_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
+
+            for id in test_list_idx[idx]:
+                if id >=60000:
+                    test_list_idx[idx].remove(id)
+
     with open(config_path, 'w') as f:
         ujson.dump(config, f)
 
