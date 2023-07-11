@@ -108,6 +108,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       lista_modelos['cids'].append(client_id)
 
       idx_cluster = idx[int(client_id)]
+      #print(idx)
       if str(idx_cluster) not in lista_modelos['models'].keys(): 
         lista_modelos['models'][str(idx_cluster)] = []
       lista_modelos['models'][str(idx_cluster)].append(parameters_to_ndarrays(parametros_client))
@@ -147,9 +148,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         #print(matrix)
 
     if clustering:
-          
-      if server_round%2 == 0:
-          
+      if (server_round) == 1 or (server_round == 2) or (server_round%10 == 0):
         idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
         
     #criar um for para cada cluster ter um modelo
@@ -216,8 +215,12 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         if server_round == 1:
            fit_ins = FitIns(parameters, config)
            return [(client, fit_ins) for client in clients]
+        
+        elif server_round == 2:
+           fit_ins = FitIns(parameters['0.0'], config)
+           return [(client, fit_ins) for client in clients]
+        
         else:
-          print(parameters.keys())
           return [(client, FitIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
   
   def configure_evaluate(
@@ -241,10 +244,14 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           num_clients=sample_size, min_num_clients=min_num_clients
       )
       # Return client/config pairs
+      #if server_round == 1:
+      #  evaluate_ins = EvaluateIns(parameters['0.0'], config)
+      #  return [(client, evaluate_ins) for client in clients]
+      #else:
+      #  return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
       if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]
+        
       else:
         return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
-      #print(parameters)
-      #return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]

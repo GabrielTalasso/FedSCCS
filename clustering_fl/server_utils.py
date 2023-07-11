@@ -16,6 +16,8 @@ def server_Hclusters(matrix, k = 3, plot_dendrogram = False):
     min_link = linkage[0][2]
     max_link = linkage[-1][2]
 
+
+    th = max_link
     for i in np.linspace(min_link,max_link, 100):
 
         le = len(pd.Series(spc.fcluster(linkage, i, 'distance' )).unique())
