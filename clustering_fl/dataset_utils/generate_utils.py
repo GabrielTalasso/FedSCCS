@@ -206,12 +206,11 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
     for idx, test_dict in enumerate(test_data):
         with open(test_path +'idx_test_'+ str(idx) + '.pickle', 'wb') as f:
             #np.savez_compressed(f, data=test_dict)
-            pickle.dump(test_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
 
             for id in test_list_idx[idx]:
                 if id >=60000:
                     test_list_idx[idx].remove(id)
-
+            pickle.dump(test_list_idx[idx], f, protocol=pickle.HIGHEST_PROTOCOL)
     with open(config_path, 'w') as f:
         ujson.dump(config, f)
 

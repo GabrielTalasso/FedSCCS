@@ -49,15 +49,15 @@ class ClientBase(fl.client.NumPyClient):
 		## test.drop('trial', axis=1, inplace=True)
 		#x_test = test.values
 
-		with open(f'./data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as file:
+		with open(f'/home/gabrieltalasso/Desktop/clustering_fl/data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as file:
 			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_train = x_train[f]
 			x_train = x_train.reshape(x_train.shape[0] , 28*28)
 			y_train = y_train[f]
 
-		with open(f'./data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as file:
-			(_ , _), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+		with open(f'/home/gabrieltalasso/Desktop/clustering_fl/data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as file:
+			(x_test , y_test), (_, _) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
 			x_test = x_test[f]
 			x_test = x_test.reshape(x_test.shape[0] , 28*28)
