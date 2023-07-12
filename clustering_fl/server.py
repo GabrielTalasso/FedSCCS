@@ -39,7 +39,7 @@ actv = []
 data_path = './data'
 n_clients = 20
 clustering = True
-n_clusters = 5
+n_clusters = 3
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]

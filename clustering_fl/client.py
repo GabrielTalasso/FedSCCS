@@ -14,7 +14,7 @@ import random
 
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = './data'
-local_epochs = 1
+local_epochs = 5
 n_clients = 20
 
 
@@ -52,17 +52,25 @@ class ClientBase(fl.client.NumPyClient):
 		with open(f'/home/gabrieltalasso/Desktop/clustering_fl/data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as file:
 			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
 			f = pickle.load(file)
-			x_train = x_train[f]
+			f = list(f)
+			ff = []
+			for i in f:
+				if i<60000:
+					ff.append(i)
+			x_train = x_train[ff]
 			x_train = x_train.reshape(x_train.shape[0] , 28*28)
-			y_train = y_train[f]
+			y_train = y_train[ff]
 
 		with open(f'/home/gabrieltalasso/Desktop/clustering_fl/data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as file:
 			(x_test , y_test), (_, _) = tf.keras.datasets.mnist.load_data()
-			f = pickle.load(file)
-			x_test = x_test[f]
+			ff = []
+			for i in f:
+				if i<60000:
+					ff.append(i)
+			x_test = x_test[ff]
 			x_test = x_test.reshape(x_test.shape[0] , 28*28)
 			#print(x_train.shape)
-			y_test = y_test[f]
+			y_test = y_test[ff]
 
 	    
 		return x_train, y_train, x_test, y_test
