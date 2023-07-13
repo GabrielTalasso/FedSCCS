@@ -38,7 +38,11 @@ def server_Hclusters2(matrix, plot_dendrogram = False):
 
     pdist = spc.distance.pdist(matrix)
     linkage = spc.linkage(pdist, method='ward')
-    idx = spc.fcluster(linkage, 'distance' )
+
+    max_link = linkage[-1][2]
+    t = max_link/3 #como escolher?
+    
+    idx = spc.fcluster(linkage, t = t, criterion = 'distance')
     print(idx)
 
     if plot_dendrogram:

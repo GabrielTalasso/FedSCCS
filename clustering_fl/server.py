@@ -39,8 +39,8 @@ actv = []
 data_path = './data'
 n_clients = 25
 clustering = True
-n_clusters = 5
-clustering_round = 5
+n_clusters = 11
+clustering_round = 2
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
@@ -151,6 +151,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     if clustering:
       if (server_round == clustering_round-1) or (server_round == clustering_round) or (server_round%50 == 0):
         idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
+        #idx = server_Hclusters2(matrix, plot_dendrogram=True)
         
     #criar um for para cada cluster ter um modelo
     parameters_aggregated = {}
