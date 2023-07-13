@@ -34,6 +34,19 @@ def server_Hclusters(matrix, k = 3, plot_dendrogram = False):
 
     return idx
 
+def server_Hclusters2(matrix, plot_dendrogram = False):
+
+    pdist = spc.distance.pdist(matrix)
+    linkage = spc.linkage(pdist, method='ward')
+    idx = spc.fcluster(linkage, 'distance' )
+    print(idx)
+
+    if plot_dendrogram:
+        dendrogram(linkage)
+        plt.show()
+
+    return idx
+
 def cka(X, Y):
 
     # Implements linear CKA as in Kornblith et al. (2019)
@@ -49,5 +62,5 @@ def cka(X, Y):
     YTY = Y.T.dot(Y)
     YTX = Y.T.dot(X)
 
-    return (YTX ** 2).sum() / np.sqrt((XTX ** 2).sum() * (YTY ** 2).sum())
+    return (YTX ** 2).sum() / (np.sqrt((XTX ** 2).sum() * (YTY ** 2).sum()))
 

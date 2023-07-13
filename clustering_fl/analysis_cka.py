@@ -55,5 +55,14 @@ with open(nome_arquivo, "wb") as f:
     pickle.dump(matrix, f)
 
 
+#for i, l in enumerate(matrix):
+#   print(matrix.mean())
+#   l = np.array(l)
+#   l = (l - l.min()) / (l.max() - l.min()) #min-max scaler
+#   #l = (l- l.mean()) / l.std()
+#   l = list(l)
+#   matrix[i] = l
+
+
 sns.heatmap(matrix, vmin = 0, vmax = 1)
 plt.show()

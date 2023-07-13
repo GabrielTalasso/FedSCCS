@@ -15,7 +15,7 @@ import random
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = './data'
 local_epochs = 5
-n_clients = 20
+n_clients = 25
 
 
 class ClientBase(fl.client.NumPyClient):
@@ -82,11 +82,7 @@ class ClientBase(fl.client.NumPyClient):
 
 		model.add(tf.keras.layers.Dense(128, activation='relu'))
 	
-		model.add(tf.keras.layers.Dense(128, activation='tanh'))
-	
-		model.add(tf.keras.layers.Dense(128, activation='elu'))
-	
-		model.add(tf.keras.layers.Dense(128, activation='relu',))
+		model.add(tf.keras.layers.Dense(64, activation='relu',))
 	
 		model.add(tf.keras.layers.Dense(10, activation='softmax'))
 

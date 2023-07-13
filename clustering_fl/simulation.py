@@ -14,8 +14,8 @@ try:
 except FileNotFoundError:
 	pass
 
-n_clients = 20
-n_rounds = 10
+n_clients = 25
+n_rounds = 15
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid))

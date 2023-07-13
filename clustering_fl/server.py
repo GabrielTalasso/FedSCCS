@@ -37,12 +37,13 @@ from server_utils import *
 
 actv = []
 data_path = './data'
-n_clients = 20
+n_clients = 25
 clustering = True
-n_clusters = 3
+n_clusters = 5
+clustering_round = 5
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
-x_servidor = x_servidor[list(np.random.random_integers(1,6000, 100))]
+x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
 x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28)
 #
 #data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
@@ -82,12 +83,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       model.add(tf.keras.layers.Flatten(input_shape=(784, )))
   
       model.add(tf.keras.layers.Dense(128, activation='relu'))
-  
-      model.add(tf.keras.layers.Dense(128, activation='tanh'))
-  
-      model.add(tf.keras.layers.Dense(128, activation='elu'))
 
-      model.add(tf.keras.layers.Dense(128, activation='relu',))
+      model.add(tf.keras.layers.Dense(64, activation='relu',))
   
       model.add(tf.keras.layers.Dense(10, activation='softmax'))
 
@@ -100,6 +97,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
     # Convert results
     weights_results = {}
+    lista_last = []
     for _, fit_res in results:
 
       client_id = str(fit_res.metrics['cliente_id'])
@@ -112,29 +110,31 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       if str(idx_cluster) not in lista_modelos['models'].keys(): 
         lista_modelos['models'][str(idx_cluster)] = []
       lista_modelos['models'][str(idx_cluster)].append(parameters_to_ndarrays(parametros_client))
-
-      #lista_modelos['models'].append(parameters_to_ndarrays(parametros_client))
-
-      #if server_round > 2:
-      #  print(idx)
-      #  lista_modelos['cluster'].append(idx[int(client_id)])
       
       if str(idx_cluster) not in weights_results.keys():
           weights_results[str(idx_cluster)] = []
       weights_results[str(idx_cluster)].append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
-    lista_last = []
-    for idx_cluster in lista_modelos['models'].keys():
-      for w in lista_modelos['models'][idx_cluster]:
-        modelo.set_weights(w)
-        modelo.predict(x_servidor) 
 
-        activation_last = get_layer_outputs(modelo, modelo.layers[-1], x_servidor, 0)
-        lista_last.append(activation_last)
+      w = lista_modelos['models'][str(idx_cluster)][-1]#
+      modelo.set_weights(w)#
+      modelo.predict(x_servidor)# 
 
-    lista_modelos['actv_last'] = lista_last
+      activation_last = get_layer_outputs(modelo, modelo.layers[-2], x_servidor, 0)#
+      lista_last.append(activation_last)#
 
-    actvs = lista_last
+
+    #lista_last = []
+    #for idx_cluster in lista_modelos['models'].keys():
+    #  for w in lista_modelos['models'][idx_cluster]:
+    #    modelo.set_weights(w)
+    #    modelo.predict(x_servidor) 
+    #    activation_last = get_layer_outputs(modelo, modelo.layers[-2], x_servidor, 0)
+    #    lista_last.append(activation_last)
+
+    lista_modelos['actv_last'] = lista_last.copy()
+
+    actvs = lista_last.copy()
 
     matrix = np.zeros((len(actvs), len(actvs)))
 
@@ -145,10 +145,11 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         y = int(lista_modelos['cids'][j])
 
         matrix[x][y] = cka(a, b)
-        #print(matrix)
+
+    #print(matrix)
 
     if clustering:
-      if (server_round) == 1 or (server_round == 2) or (server_round%50 == 0):
+      if (server_round == clustering_round-1) or (server_round == clustering_round) or (server_round%50 == 0):
         idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
         
     #criar um for para cada cluster ter um modelo
@@ -216,7 +217,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
            fit_ins = FitIns(parameters, config)
            return [(client, fit_ins) for client in clients]
         
-        elif server_round == 2:
+        elif server_round <= clustering_round:
            fit_ins = FitIns(parameters['0.0'], config)
            return [(client, fit_ins) for client in clients]
         
@@ -252,6 +253,9 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]
-        
+      
+      elif server_round == clustering_round-1:
+        evaluate_ins = EvaluateIns(parameters['0.0'], config)
+        return [(client, evaluate_ins) for client in clients]      
       else:
         return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]

@@ -10,9 +10,9 @@ from generate_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 20
+num_clients = 15
 num_classes = 10
-dir_path = "./data/20/"
+dir_path = "./data/15/"
 
 
 # Allocate data to users
@@ -79,4 +79,6 @@ if __name__ == "__main__":
     partition = sys.argv[3] if sys.argv[3] != "-" else None
 
     generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
+
+    #generate_mnist.py noniid - dir
     
