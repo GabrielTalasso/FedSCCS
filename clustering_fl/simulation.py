@@ -14,15 +14,24 @@ try:
 except FileNotFoundError:
 	pass
 
-n_clients = 25
+
+n_clients = 10
 n_rounds = 15
+n_clusters = 1
+clustering = True
+cluster_round = 5
+non_iid = False
 
 def funcao_cliente(cid):
-	return ClientBase(int(cid))
+	return ClientBase(int(cid), n_clients=n_clients,
+		    dataset='MNIST', non_iid=non_iid, model_name = 'DNN',
+			local_epochs = 5, n_rounds = n_rounds, n_clusters = n_clusters)
 
 history = fl.simulation.start_simulation(client_fn=funcao_cliente, 
 								num_clients=n_clients, 
-								strategy=NeuralMatch(fraction_fit=1),
+								strategy=NeuralMatch(model_name='DNN',  n_clients = n_clients, 
+			     									clustering = clustering, clustering_round = cluster_round, 
+													n_clusters = n_clusters),
 								config=fl.server.ServerConfig(n_rounds))
 
 
