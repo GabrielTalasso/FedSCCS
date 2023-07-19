@@ -63,11 +63,11 @@ class ManageDatasets():
 
 			with open(f'data/MNIST/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
 				idx_train = pickle.load(handle)
-				idx_train = np.random.choice(idx_train, 1000)
+				idx_train = np.random.choice(idx_train, int(len(idx_train)*0.1))
 
 			with open(f'data/MNIST/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
 				idx_test = pickle.load(handle)
-				idx_test = np.random.choice(idx_test, 100)
+				idx_test = np.random.choice(idx_test, int(len(idx_test)*0.1))
 
 
 			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()

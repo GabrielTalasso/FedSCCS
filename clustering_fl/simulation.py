@@ -15,9 +15,9 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'MNIST'
-n_clients = 25
+n_clients = 10
 n_rounds = 15
-n_clusters = 5
+n_clusters = 8
 clustering = True
 cluster_round = 5
 non_iid = True
