@@ -128,8 +128,8 @@ class ManageDatasets():
 
 
 	def slipt_dataset(self, x_train, y_train, x_test, y_test, n_clients):
-		p_train = int(len(x_train)/n_clients)
-		p_test  = int(len(x_test)/n_clients)
+		p_train = int(len(x_train)/(10*n_clients))
+		p_test  = int(len(x_test)/(10*n_clients))
 
 
 		random.seed(self.cid)

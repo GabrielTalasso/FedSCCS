@@ -40,7 +40,7 @@ from model_definition import ModelCreation
 
 actv = []
 data_path = './data'
-n_clients = 10
+n_clients = 25
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
@@ -70,13 +70,14 @@ idx = list(np.zeros(n_clients))
 
 class NeuralMatch(fl.server.strategy.FedAvg):
 
-  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round):
+  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round, dataset):
 
     self.model_name = model_name
     self.n_clusters = n_clusters
     self.n_clients = n_clients
     self.clustering = clustering
     self.clustering_round = clustering_round
+    self.dataset = dataset
 
     super().__init__(fraction_fit=1, 
 		    min_available_clients=self.n_clients, 
@@ -162,8 +163,11 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
     if self.clustering:
       if (server_round == self.clustering_round-1) or (server_round == self.clustering_round) or (server_round%50 == 0):
-        idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True)
+        idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=False)
         #idx = server_Hclusters2(matrix, plot_dendrogram=True)
+
+        with open(f'results/clusters_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.txt', 'a') as arq:
+          arq.write(f"{idx} - round{server_round}\n")
         
     #criar um for para cada cluster ter um modelo
     parameters_aggregated = {}
