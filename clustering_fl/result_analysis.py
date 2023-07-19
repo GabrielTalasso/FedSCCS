@@ -7,12 +7,12 @@ import seaborn as sns
 
 dataset = 'MNIST'
 n_rounds = 15
-n_clients = 25
+n_clients = 10
 n_clusters = [1,5,8]
-n_clusters = [ 5, 10,15]
+#n_clusters = [ 1, 5, 10,15]
 
 for c in n_clusters:
-    acc =  pd.read_csv(f'./results/acc_{dataset}_{n_clients}clients_{c}clusters.csv',
+    acc =  pd.read_csv(f'./experiments/iid/acc_{dataset}_{n_clients}clients_{c}clusters.csv',
                        names=['_', 'client', 'acc', 'loss']).drop('_', axis = 1)
     if c==1:
         label_clusters = 'FedAvg'

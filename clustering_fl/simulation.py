@@ -17,10 +17,10 @@ except FileNotFoundError:
 dataset_name = 'MNIST'
 n_clients = 25
 n_rounds = 15
-n_clusters = 1
+n_clusters = 5
 clustering = True
 cluster_round = 5
-non_iid = False
+non_iid = True
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid), n_clients=n_clients,
