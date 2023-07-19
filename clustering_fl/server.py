@@ -33,14 +33,14 @@ import keras.backend as K
 import pandas as pd
 from server_utils import *
 
+from dataset_utils import ManageDatasets
+from model_definition import ModelCreation
+
 #como salvar as ativações sem ser utilizando esse dicionario global?
 
 actv = []
 data_path = './data'
-n_clients = 25
-clustering = True
-n_clusters = 11
-clustering_round = 2
+n_clients = 10
 
 (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
 x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
@@ -70,27 +70,39 @@ idx = list(np.zeros(n_clients))
 
 class NeuralMatch(fl.server.strategy.FedAvg):
 
+  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round):
+
+    self.model_name = model_name
+    self.n_clusters = n_clusters
+    self.n_clients = n_clients
+    self.clustering = clustering
+    self.clustering_round = clustering_round
+
+    super().__init__(fraction_fit=1, 
+		    min_available_clients=self.n_clients, 
+		    min_fit_clients=self.n_clients, 
+		    min_evaluate_clients=self.n_clients)
+
   global x_servidor
   global y_servidor
   global modelos
   global actv
   global idx
 
+
   def aggregate_fit(self, server_round, results, failures):
     global idx  
-    def create_model():
-      model = tf.keras.models.Sequential()
-      model.add(tf.keras.layers.Flatten(input_shape=(784, )))
-  
-      model.add(tf.keras.layers.Dense(128, activation='relu'))
 
-      model.add(tf.keras.layers.Dense(64, activation='relu',))
-  
-      model.add(tf.keras.layers.Dense(10, activation='softmax'))
+    def create_model(self):
+      input_shape = x_servidor.shape
 
-      return model
+      if self.model_name == 'DNN':
+        return ModelCreation().create_DNN(input_shape, 10)
 
-    modelo = create_model()
+      elif self.model_name == 'CNN':
+        return ModelCreation().create_CNN(input_shape, 10)
+
+    modelo = create_model(self)
 
     """Aggregate fit results using weighted average."""
     lista_modelos = {'cids': [], 'models' : {}, 'cluster': []}
@@ -148,9 +160,9 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
     #print(matrix)
 
-    if clustering:
-      if (server_round == clustering_round-1) or (server_round == clustering_round) or (server_round%50 == 0):
-        idx = server_Hclusters(matrix, n_clusters, plot_dendrogram=True)
+    if self.clustering:
+      if (server_round == self.clustering_round-1) or (server_round == self.clustering_round) or (server_round%50 == 0):
+        idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True)
         #idx = server_Hclusters2(matrix, plot_dendrogram=True)
         
     #criar um for para cada cluster ter um modelo
@@ -218,7 +230,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
            fit_ins = FitIns(parameters, config)
            return [(client, fit_ins) for client in clients]
         
-        elif server_round <= clustering_round:
+        elif server_round <= self.clustering_round:
            fit_ins = FitIns(parameters['0.0'], config)
            return [(client, fit_ins) for client in clients]
         
@@ -255,7 +267,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]
       
-      elif server_round == clustering_round-1:
+      elif server_round == self.clustering_round-1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]      
       else:
