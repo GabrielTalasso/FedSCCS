@@ -81,7 +81,7 @@ class ClientBase(fl.client.NumPyClient):
 		
 		with open(f'results/acc_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
 			arquivo.write(f"{self.round}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
-	 
+	 		
 
 
 		#acc = pd.read_csv('/content/acc.csv')		

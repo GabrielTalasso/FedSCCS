@@ -17,7 +17,7 @@ except FileNotFoundError:
 dataset_name = 'MNIST'
 n_clients = 25
 n_rounds = 15
-n_clusters = 1
+n_clusters = 10
 clustering = True
 cluster_round = 5
 non_iid = True

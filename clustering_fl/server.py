@@ -37,14 +37,12 @@ from dataset_utils import ManageDatasets
 from model_definition import ModelCreation
 
 #como salvar as ativações sem ser utilizando esse dicionario global?
-
-actv = []
 data_path = './data'
 n_clients = 25
 
-(x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
-x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
-x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28)
+#(x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
+#x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
+#x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28)
 #
 #data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
 #x_servidor = pd.DataFrame()
@@ -65,7 +63,6 @@ def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
     return layer_fn(input_data)
 
-modelos = []
 idx = list(np.zeros(n_clients))
 
 class NeuralMatch(fl.server.strategy.FedAvg):
@@ -83,19 +80,24 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 		    min_available_clients=self.n_clients, 
 		    min_fit_clients=self.n_clients, 
 		    min_evaluate_clients=self.n_clients)
+    
+    if dataset == 'MNIST':
+      (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
+      x_servidor = x_servidor[list(np.random.random_integers(1,60000, 1000))]
+      self.x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28) 
 
-  global x_servidor
-  global y_servidor
-  global modelos
-  global actv
+    if dataset == 'CIFAR10':
+      (x_servidor, _), (_, _) = tf.keras.datasets.cifar10.load_data()
+      self.x_servidor = x_servidor[list(np.random.random_integers(1,50000, 1000))]
+      #self.x_servidor = x_servidor.reshape(x_servidor.shape[0] , 32*32) 
+        
   global idx
-
 
   def aggregate_fit(self, server_round, results, failures):
     global idx  
 
     def create_model(self):
-      input_shape = x_servidor.shape
+      input_shape = self.x_servidor.shape
 
       if self.model_name == 'DNN':
         return ModelCreation().create_DNN(input_shape, 10)
@@ -131,9 +133,9 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
       w = lista_modelos['models'][str(idx_cluster)][-1]#
       modelo.set_weights(w)#
-      modelo.predict(x_servidor)# 
+      modelo.predict(self.x_servidor)# 
 
-      activation_last = get_layer_outputs(modelo, modelo.layers[-2], x_servidor, 0)#
+      activation_last = get_layer_outputs(modelo, modelo.layers[-2], self.x_servidor, 0)#
       lista_last.append(activation_last)#
 
 
@@ -174,7 +176,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     for idx_cluster in weights_results.keys():   
       parameters_aggregated[idx_cluster] = ndarrays_to_parameters(aggregate(weights_results[idx_cluster]))
 
-    actv.append(lista_modelos)
+    #actv.append(lista_modelos)
 
     metrics_aggregated = {}
 
@@ -205,9 +207,10 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
         #print(actv[0].keys())
 
-        metrics_aggregated = {'str':server_round, 
-                              'cids' : actv[0]['cids'],
-                              'actv_last' : actv[0]['actv_last']}
+        #metrics_aggregated = {'str':server_round, 
+        #                      'cids' : actv[0]['cids'],
+        #                      'actv_last' : actv[0]['actv_last']}
+        metrics_aggregated = {}
 
 
         return loss_aggregated, metrics_aggregated
