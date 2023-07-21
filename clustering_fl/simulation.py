@@ -14,13 +14,13 @@ try:
 except FileNotFoundError:
 	pass
 
-dataset_name = 'CIFAR10'
-n_clients = 10
+dataset_name = 'MNIST'
+n_clients = 25
 n_rounds = 15
-n_clusters = 5
+n_clusters = 15
 clustering = True
 cluster_round = 5
-non_iid = False
+non_iid = True
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid), n_clients=n_clients,
