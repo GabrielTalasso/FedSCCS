@@ -9,6 +9,9 @@ from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as spc
 from scipy.cluster.hierarchy import dendrogram, linkage
 
+from sklearn.cluster import AffinityPropagation
+from sklearn.cluster import OPTICS
+
 def server_Hclusters(matrix, k = 3, plot_dendrogram = False):
 
     pdist = spc.distance.pdist(matrix)
@@ -50,6 +53,19 @@ def server_Hclusters2(matrix, plot_dendrogram = False):
         plt.show()
 
     return idx
+
+def server_AffinityClustering(matrix):
+
+    af = AffinityPropagation(random_state=0).fit( 1 / matrix )
+    idx = af.labels_
+
+    return idx
+
+def server_OPTICSClustering(matrix):
+    clustering = OPTICS(min_samples=2).fit(1/ matrix)
+    idx = clustering.labels_
+
+
 
 def cka(X, Y):
 

@@ -14,7 +14,7 @@ try:
 except FileNotFoundError:
 	pass
 
-dataset_name = 'MNIST'
+dataset_name = 'CIFAR10'
 n_clients = 25
 n_rounds = 15
 n_clusters = 15

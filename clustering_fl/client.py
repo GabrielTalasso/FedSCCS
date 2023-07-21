@@ -17,10 +17,6 @@ from model_definition import ModelCreation
 
 from sys import getsizeof
 
-
-## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
-data_path = './data'
-
 class ClientBase(fl.client.NumPyClient):
 
 	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid,

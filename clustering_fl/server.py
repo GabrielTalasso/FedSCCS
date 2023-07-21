@@ -38,28 +38,7 @@ from model_definition import ModelCreation
 
 from sys import getsizeof
 
-#como salvar as ativações sem ser utilizando esse dicionario global?
-data_path = './data'
 n_clients = 25
-
-#(x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
-#x_servidor = x_servidor[list(np.random.random_integers(1,6000, 1000))]
-#x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28)
-#
-#data_perc = 0.01 #percentual de dados que serão compartilhados de cada cliente
-#x_servidor = pd.DataFrame()
-#
-#for i in range(n_clients):
-#  with open(f'{data_path}/client{i+1}.csv', 'rb') as train_file:
-#    data_client_i = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1) 
-#    x_servidor = pd.concat([data_client_i.sample(int(len(data_client_i)*data_perc)), x_servidor],
-#                           ignore_index = True)
-#
-#y_servidor =  x_servidor['label'].values
-#x_servidor.drop('label', axis=1, inplace=True)
-# train.drop('subject', axis=1, inplace=True)
-# train.drop('trial', axis=1, inplace=True)
-#x_servidor =  x_servidor.values
 
 def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
@@ -69,7 +48,7 @@ idx = list(np.zeros(n_clients))
 
 class NeuralMatch(fl.server.strategy.FedAvg):
 
-  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round, dataset):
+  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round, dataset, fraction_fit):
 
     self.model_name = model_name
     self.n_clusters = n_clusters
@@ -140,15 +119,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       activation_last = get_layer_outputs(modelo, modelo.layers[-2], self.x_servidor, 0)#
       lista_last.append(activation_last)#
 
-
-    #lista_last = []
-    #for idx_cluster in lista_modelos['models'].keys():
-    #  for w in lista_modelos['models'][idx_cluster]:
-    #    modelo.set_weights(w)
-    #    modelo.predict(x_servidor) 
-    #    activation_last = get_layer_outputs(modelo, modelo.layers[-2], x_servidor, 0)
-    #    lista_last.append(activation_last)
-
     lista_modelos['actv_last'] = lista_last.copy()
 
     actvs = lista_last.copy()
@@ -178,8 +148,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     for idx_cluster in weights_results.keys():   
       parameters_aggregated[idx_cluster] = ndarrays_to_parameters(aggregate(weights_results[idx_cluster]))
 
-    #actv.append(lista_modelos)
-
     metrics_aggregated = {}
 
     return parameters_aggregated, metrics_aggregated
@@ -206,12 +174,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
 
         # Aggregate custom metrics if aggregation fn was provided
-
-        #print(actv[0].keys())
-
-        #metrics_aggregated = {'str':server_round, 
-        #                      'cids' : actv[0]['cids'],
-        #                      'actv_last' : actv[0]['actv_last']}
         metrics_aggregated = {}
 
 
@@ -266,12 +228,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       clients = client_manager.sample(
           num_clients=sample_size, min_num_clients=min_num_clients
       )
-      # Return client/config pairs
-      #if server_round == 1:
-      #  evaluate_ins = EvaluateIns(parameters['0.0'], config)
-      #  return [(client, evaluate_ins) for client in clients]
-      #else:
-      #  return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
       if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]

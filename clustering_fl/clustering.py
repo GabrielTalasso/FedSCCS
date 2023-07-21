@@ -8,6 +8,8 @@ from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as spc
 from scipy.cluster.hierarchy import dendrogram, linkage
 
+from sklearn.cluster import AffinityPropagation
+
 sns.set()
 
 file_path = './data/ckas.pickle'
@@ -26,7 +28,7 @@ linkage = spc.linkage(pdist, method='ward')
 min_link = linkage[0][2]
 max_link = linkage[-1][2]
 
-k = 3
+k = 5
 
 for i in np.linspace(min_link,max_link, 100):
 
@@ -36,5 +38,24 @@ for i in np.linspace(min_link,max_link, 100):
 
 idx = spc.fcluster(linkage, th, 'distance' )
 print(idx)
-dendrogram(linkage, color_threshold=th)
+#dendrogram(linkage, color_threshold=th)
+#plt.show()
+
+
+af = AffinityPropagation(random_state=0).fit(1 / ckas)
+cluster_centers_indices = af.cluster_centers_indices_
+labels = af.labels_
+print(labels)
+
+
+from sklearn.cluster import OPTICS
+clustering = OPTICS(min_samples=2).fit(1/ ckas)
+print(clustering.labels_)
+
+
+from sklearn.decomposition import PCA 
+pca = PCA(n_components=2)
+pca = pca.fit(ckas)
+
+sns.scatterplot(x = pca.components_[0], y = pca.components_[1], hue = idx, palette='tab10')
 plt.show()
