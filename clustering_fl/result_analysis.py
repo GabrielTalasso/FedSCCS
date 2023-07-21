@@ -7,12 +7,12 @@ import seaborn as sns
 
 dataset = 'MNIST'
 n_rounds = 15
-n_clients = 10
-n_clusters = [1,5,8]
-#n_clusters = [ 1, 5]#, 10,15]
+n_clients = 25
+#n_clusters = [1,5,8]
+n_clusters = [ 1, 5, 10, 15]
 
-#path = './experiments/iid'
-path = './results'
+path = './experiments/MNIST/iid'
+path = './experiments/MNIST/noniid'
 
 for c in n_clusters:
     acc =  pd.read_csv(f'{path}/acc_{dataset}_{n_clients}clients_{c}clusters.csv',

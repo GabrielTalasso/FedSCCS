@@ -116,15 +116,6 @@ class ManageDatasets():
 		
 		return x_train, y_train, x_test, y_test
 
-
-	def load_CIFAR100(self, n_clients, non_iid=False):
-		(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-		x_train, x_test                      = x_train/255.0, x_test/255.0
-		x_train, y_train, x_test, y_test     = self.slipt_dataset(x_train, y_train, x_test, y_test, n_clients)
-
-		return x_train, y_train, x_test, y_test
-
-
 	def slipt_dataset(self, x_train, y_train, x_test, y_test, n_clients):
 		p_train = int(len(x_train)/(10*n_clients))
 		p_test  = int(len(x_test)/(10*n_clients))

@@ -15,6 +15,8 @@ import random
 from dataset_utils import ManageDatasets
 from model_definition import ModelCreation
 
+from sys import getsizeof
+
 
 ## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
 data_path = './data'
@@ -61,10 +63,9 @@ class ClientBase(fl.client.NumPyClient):
 		#config recebe parametros do servidor
 		self.model.set_weights(parameters)
 		h = self.model.fit(self.x_train, self.y_train, 
-		                                validation_data = (self.x_test, self.y_test),
-																		verbose=1, epochs=self.local_epochs)
+		                    validation_data = (self.x_test, self.y_test),
+							verbose=1, epochs=self.local_epochs)
 
-	
 		# '''
 		# adicionar metodos
 		# metricas

@@ -36,6 +36,8 @@ from server_utils import *
 from dataset_utils import ManageDatasets
 from model_definition import ModelCreation
 
+from sys import getsizeof
+
 #como salvar as ativações sem ser utilizando esse dicionario global?
 data_path = './data'
 n_clients = 25
