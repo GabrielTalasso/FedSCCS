@@ -30,6 +30,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import keras.backend as K
 
+from sklearn.metrics.pairwise import cosine_similarity
+
 import pandas as pd
 from server_utils import *
 
@@ -120,7 +122,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
       activation_last = get_layer_outputs(modelo, modelo.layers[-2], self.x_servidor, 0)#
       lista_last.append(activation_last)#
-      #lista_last_layer.append(modelo.layers[-2].numpy())#
+      lista_last_layer.append(modelo.layers[-1].weights[0].numpy().flatten())#
 
     lista_modelos['actv_last'] = lista_last.copy()
     lista_modelos['last_layer'] = lista_last_layer
@@ -137,6 +139,14 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
         matrix[x][y] = cka(a, b)
 
+
+    # with weights
+    matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
+    for i , a in enumerate(lista_last_layer):
+      for j, b in enumerate(lista_last_layer):
+        x = int(lista_modelos['cids'][i])
+        y = int(lista_modelos['cids'][j])
+        matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
     #print(matrix)
 
     if self.clustering:
@@ -145,13 +155,14 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         if self.n_clusters == 'Affinity':
           idx = server_AffinityClustering(matrix)
         else:
-          #idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
-          #                        dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters)
-          unique = 0
-          while unique != self.n_clusters:
-            idx = list(np.random.randint(0, self.n_clusters, self.n_clients))
-            unique = np.unique(np.array(idx))
-            unique = len(unique)
+          idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
+                                  dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters)
+          ## for random clusters:
+          #unique = 0
+          #while unique != self.n_clusters:
+          #  idx = list(np.random.randint(0, self.n_clusters, self.n_clients))
+          #  unique = np.unique(np.array(idx))
+          #  unique = len(unique)
 
         with open(f'results/clusters_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.txt', 'a') as arq:
           arq.write(f"{idx} - round{server_round}\n")

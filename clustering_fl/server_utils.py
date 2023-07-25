@@ -21,7 +21,7 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
 
 
     th = max_link
-    for i in np.linspace(min_link,max_link, 100):
+    for i in np.linspace(min_link,max_link, 5000):
 
         le = len(pd.Series(spc.fcluster(linkage, i, 'distance' )).unique())
         if le == k:
@@ -33,7 +33,7 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
     if plot_dendrogram:
 
         dendrogram(linkage, color_threshold=th)
-        plt.savefig(f'results/clusters_{dataset}_{n_clients}clients_{n_clusters}clusters.txt.png')
+        plt.savefig(f'results/clusters_{dataset}_{n_clients}clients_{n_clusters}clusters.png')
     
 
     return idx
