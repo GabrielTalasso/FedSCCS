@@ -89,11 +89,13 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     modelo = create_model(self)
 
     """Aggregate fit results using weighted average."""
-    lista_modelos = {'cids': [], 'models' : {}, 'cluster': []}
+    lista_modelos = {'cids': [], 'models' : {}}
 
     # Convert results
     weights_results = {}
     lista_last = []
+    lista_last_layer = []
+
     for _, fit_res in results:
 
       client_id = str(fit_res.metrics['cliente_id'])
@@ -114,12 +116,14 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
       w = lista_modelos['models'][str(idx_cluster)][-1]#
       modelo.set_weights(w)#
-      modelo.predict(self.x_servidor)# 
+      #modelo.predict(self.x_servidor)# 
 
       activation_last = get_layer_outputs(modelo, modelo.layers[-2], self.x_servidor, 0)#
       lista_last.append(activation_last)#
+      #lista_last_layer.append(modelo.layers[-2].numpy())#
 
     lista_modelos['actv_last'] = lista_last.copy()
+    lista_modelos['last_layer'] = lista_last_layer
 
     actvs = lista_last.copy()
 
@@ -137,8 +141,17 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
     if self.clustering:
       if (server_round == self.clustering_round-1) or (server_round == self.clustering_round) or (server_round%50 == 0):
-        idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=False)
-        #idx = server_Hclusters2(matrix, plot_dendrogram=True)
+        
+        if self.n_clusters == 'Affinity':
+          idx = server_AffinityClustering(matrix)
+        else:
+          #idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
+          #                        dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters)
+          unique = 0
+          while unique != self.n_clusters:
+            idx = list(np.random.randint(0, self.n_clusters, self.n_clients))
+            unique = np.unique(np.array(idx))
+            unique = len(unique)
 
         with open(f'results/clusters_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.txt', 'a') as arq:
           arq.write(f"{idx} - round{server_round}\n")

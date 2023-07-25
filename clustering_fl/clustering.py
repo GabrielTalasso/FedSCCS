@@ -28,7 +28,7 @@ linkage = spc.linkage(pdist, method='ward')
 min_link = linkage[0][2]
 max_link = linkage[-1][2]
 
-k = 5
+k = 2
 
 for i in np.linspace(min_link,max_link, 100):
 
@@ -57,5 +57,12 @@ from sklearn.decomposition import PCA
 pca = PCA(n_components=2)
 pca = pca.fit(ckas)
 
-sns.scatterplot(x = pca.components_[0], y = pca.components_[1], hue = idx, palette='tab10')
+sns.set_theme(style='white')
+sns.scatterplot(x = pca.components_[0], y = pca.components_[1], hue = labels, palette='tab10')
 plt.show()
+
+from sklearn.manifold import TSNE
+tsne = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(ckas)
+sns.scatterplot(x = tsne[:,0], y = tsne[:,1], hue = labels, palette='tab10')
+sns.set_theme(style='white')
+#plt.show()

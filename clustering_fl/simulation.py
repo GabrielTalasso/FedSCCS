@@ -14,10 +14,10 @@ try:
 except FileNotFoundError:
 	pass
 
-dataset_name = 'CIFAR10'
+dataset_name = 'MNIST'
 n_clients = 25
 n_rounds = 15
-n_clusters = 15
+n_clusters = 10
 clustering = True
 cluster_round = 5
 non_iid = True
@@ -31,7 +31,7 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 								num_clients=n_clients, 
 								strategy=NeuralMatch(model_name='DNN',  n_clients = n_clients, 
 			     									clustering = clustering, clustering_round = cluster_round, 
-													n_clusters = n_clusters, dataset=dataset_name),
+													n_clusters = n_clusters, dataset=dataset_name, fraction_fit=1),
 								config=fl.server.ServerConfig(n_rounds))
 
 
