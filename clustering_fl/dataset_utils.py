@@ -64,11 +64,11 @@ class ManageDatasets():
 
 			if Xnon_iid:
 
-				with open(f'data/MNIST/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
+				with open(f'/data/MNIST/Xnon_iid/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
 					idx_train = pickle.load(handle)
 					#idx_train = np.random.choice(idx_train, int(len(idx_train)*0.1))
 
-				with open(f'data/MNIST/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
+				with open(f'/data/MNIST/Xnon_iid/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
 					idx_test = pickle.load(handle)
 					#idx_test = np.random.choice(idx_test, int(len(idx_test)*0.1))
 
