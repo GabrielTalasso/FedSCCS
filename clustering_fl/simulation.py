@@ -15,17 +15,18 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'MNIST'
-n_clients = 25
+n_clients = 20
 n_rounds = 15
 n_clusters = 10
 clustering = True
 cluster_round = 5
 non_iid = True
+Xnon_iid = True
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid), n_clients=n_clients,
 		    dataset=dataset_name, non_iid=non_iid, model_name = 'DNN',
-			local_epochs = 1, n_rounds = n_rounds, n_clusters = n_clusters)
+			local_epochs = 1, n_rounds = n_rounds, n_clusters = n_clusters, Xnon_iid=Xnon_iid)
 
 history = fl.simulation.start_simulation(client_fn=funcao_cliente, 
 								num_clients=n_clients, 
@@ -39,13 +40,3 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-
-#1)
-#fazer clustering com base no CKA por aqui
-
-#- passar a parte do calculo do clustering para o servidor
-#- como treinar varios modelos no servidor?
-
-
-#treina algumas rodadas -> clusteriza -> treina os clusters

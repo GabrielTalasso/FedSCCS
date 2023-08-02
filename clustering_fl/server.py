@@ -139,14 +139,13 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
         matrix[x][y] = cka(a, b)
 
-
     # with weights
-    matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
-    for i , a in enumerate(lista_last_layer):
-      for j, b in enumerate(lista_last_layer):
-        x = int(lista_modelos['cids'][i])
-        y = int(lista_modelos['cids'][j])
-        matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
+    #matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
+    #for i , a in enumerate(lista_last_layer):
+    #  for j, b in enumerate(lista_last_layer):
+    #    x = int(lista_modelos['cids'][i])
+    #    y = int(lista_modelos['cids'][j])
+    #    matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
     #print(matrix)
 
     if self.clustering:
@@ -156,7 +155,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           idx = server_AffinityClustering(matrix)
         else:
           idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
-                                  dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters)
+                                  dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters, 
+                                  server_round = server_round, cluster_round=self.clustering_round)
           ## for random clusters:
           #unique = 0
           #while unique != self.n_clusters:

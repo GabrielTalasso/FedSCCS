@@ -9,7 +9,7 @@ dataset = 'MNIST'
 n_rounds = 15
 n_clients = 25
 n_clusters = [1,2, 5,8, 'Affinity']
-n_clusters = [ 1, 5, 10, 15, 'Affinity']
+n_clusters = [ 5, 10, 15]
 
 path = './experiments/MNIST/noniid'
 #path = './experiments/MNIST/noniid'
@@ -28,6 +28,7 @@ for c in n_clusters:
     acc['round'] = rounds
 
     sns.lineplot(acc.groupby('round').mean(), y = 'acc', x = 'round', legend='brief', label=label_clusters)
+#plt.ylim(0.7, 1)
 plt.show()
 
 ## comparing with random clusters:
@@ -43,7 +44,7 @@ acc =  pd.read_csv(f'{path}/acc_{dataset}_{n_clients}clients_{c}clusters.csv',
                        names=['_', 'client', 'acc', 'loss']).drop('_', axis = 1)
 acc['round'] = rounds
 sns.lineplot(acc.groupby('round').mean(), y = 'acc', x = 'round', legend='brief', label='cka_clusters')
-
+plt.ylim(0.7, 0.95)
 plt.show()
 
 
@@ -67,5 +68,5 @@ acc['round'] = rounds
 
 sns.lineplot(acc.groupby('round').mean(), y = 'acc', x = 'round', legend='brief', label='cka_clusters')
 
-#plt.ylim(0.65, 1)
+plt.ylim(0.5, 0.95)
 plt.show()

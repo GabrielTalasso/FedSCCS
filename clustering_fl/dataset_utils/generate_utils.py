@@ -4,9 +4,10 @@ import numpy as np
 import gc
 from sklearn.model_selection import train_test_split
 
+
 batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
-least_samples = 300#batch_size / (1-train_size) # least samples for each client
+least_samples = 300 #batch_size / (1-train_size) # least samples for each client
 alpha = 0.1 # for Dirichlet distribution
 list_idx = []
 
@@ -177,8 +178,8 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
     #print(train_list_idx[-1][-10:])
     #print(test_list_idx[-1][-10:])
 
-    train_path = './data/15/'
-    test_path = './data/15/'
+    train_path = f'./data/{num_clients}/'
+    test_path = f'./data/{num_clients}/'
     import pickle
     for idx, train_dict in enumerate(train_data):
         with open(train_path +'idx_train_' + str(idx) + '.pickle', 'wb') as f:

@@ -12,7 +12,8 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import OPTICS
 
-def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters):
+def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters,
+                    server_round, cluster_round):
 
     pdist = spc.distance.pdist(matrix)
     linkage = spc.linkage(pdist, method='ward')
@@ -30,7 +31,7 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
     idx = spc.fcluster(linkage, th, 'distance' )
     print(idx)
 
-    if plot_dendrogram:
+    if plot_dendrogram and (server_round == cluster_round):
 
         dendrogram(linkage, color_threshold=th)
         plt.savefig(f'results/clusters_{dataset}_{n_clients}clients_{n_clusters}clusters.png')

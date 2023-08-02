@@ -10,9 +10,9 @@ from generate_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 15
+num_clients = 10
 num_classes = 10
-dir_path = "./data/15/"
+dir_path = f"./data/{num_clients}/"
 
 
 # Allocate data to users

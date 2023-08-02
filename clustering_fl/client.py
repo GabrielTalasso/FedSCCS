@@ -19,7 +19,7 @@ from sys import getsizeof
 
 class ClientBase(fl.client.NumPyClient):
 
-	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid,
+	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid, Xnon_iid,
 	      n_rounds, n_clusters):
 
 		self.cid = cid
@@ -28,6 +28,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.dataset = dataset
 		self.model_name = model_name
 		self.non_iid = non_iid
+		self.Xnon_iid = Xnon_iid
 		self.local_epochs = local_epochs
 
 		self.x_train, self.y_train, self.x_test, self.y_test = self.load_data()
@@ -37,7 +38,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.n_clusters = n_clusters
 
 	def load_data(self):
-		return ManageDatasets(self.cid).select_dataset(self.dataset, self.n_clients, self.non_iid)
+		return ManageDatasets(self.cid).select_dataset(self.dataset, self.n_clients, self.non_iid, self.Xnon_iid)
 
 	def create_model(self):
 		input_shape = self.x_train.shape

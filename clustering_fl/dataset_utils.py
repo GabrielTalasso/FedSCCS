@@ -1,4 +1,5 @@
 import tensorflow as tf
+import torch
 import numpy as np
 import random
 import pickle
@@ -56,28 +57,55 @@ class ManageDatasets():
 		return x_train, y_train, x_test, y_test
 
 
-	def load_MNIST(self, n_clients, non_iid=False):
+	def load_MNIST(self, n_clients, non_iid=False, Xnon_iid = False):
 
 
 		if non_iid:
 
-			with open(f'data/MNIST/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
-				idx_train = pickle.load(handle)
-				idx_train = np.random.choice(idx_train, int(len(idx_train)*0.1))
+			if Xnon_iid:
 
-			with open(f'data/MNIST/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
-				idx_test = pickle.load(handle)
-				idx_test = np.random.choice(idx_test, int(len(idx_test)*0.1))
+				with open(f'data/MNIST/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
+					idx_train = pickle.load(handle)
+					#idx_train = np.random.choice(idx_train, int(len(idx_train)*0.1))
+
+				with open(f'data/MNIST/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
+					idx_test = pickle.load(handle)
+					#idx_test = np.random.choice(idx_test, int(len(idx_test)*0.1))
+
+				idx_train = idx_train[int(self.cid)]
+				idx_test = idx_test[int(self.cid)]
+			
+				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+				x_train, x_test                      = x_train/255.0, x_test/255.0
+
+				x = np.concatenate([x_train, x_test], axis=0)
+				y = np.concatenate([y_train, y_test], axis=0)
+
+				x_train = x[idx_train]
+				x_test  = x[idx_test]
+
+				y_train = y[idx_train]
+				y_test  = y[idx_test]
+
+			else:
+
+				with open(f'data/MNIST/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
+					idx_train = pickle.load(handle)
+					idx_train = np.random.choice(idx_train, int(len(idx_train)*0.1))
+
+				with open(f'data/MNIST/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
+					idx_test = pickle.load(handle)
+					idx_test = np.random.choice(idx_test, int(len(idx_test)*0.1))
 
 
-			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-			x_train, x_test                      = x_train/255.0, x_test/255.0
+				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+				x_train, x_test                      = x_train/255.0, x_test/255.0
 
-			x_train = x_train[idx_train] 
-			x_test  = x_test[idx_test]
+				x_train = x_train[idx_train] 
+				x_test  = x_test[idx_test]
 
-			y_train = y_train[idx_train]
-			y_test  = y_test[idx_test]
+				y_train = y_train[idx_train]
+				y_test  = y_test[idx_test]
 			
 
 		else:
@@ -88,26 +116,48 @@ class ManageDatasets():
 
 		return x_train, y_train, x_test, y_test
 
-	def load_CIFAR10(self, n_clients, non_iid=False):
+	def load_CIFAR10(self, n_clients, non_iid=False, Xnon_iid = False):
 		
 		if non_iid:
+
+			if Xnon_iid:
+
+				with open(f'data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
+					idx_train = pickle.load(handle)
+
+				with open(f'data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
+					idx_test = pickle.load(handle)
 			
-			with open(f'data/CIFAR10/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
-				idx_train = pickle.load(handle)
+				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+				x_train, x_test                      = x_train/255.0, x_test/255.0
 
-			with open(f'data/CIFAR10/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
-				idx_test = pickle.load(handle)
+				x = np.concatenate([x_train, x_test], axis=0)
+				y = np.concatenate([y_train, y_test], axis=0)
 
+				x_train = x[idx_train]
+				x_test  = x[idx_test]
 
-			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-			x_train, x_test                      = x_train/255.0, x_test/255.0
+				y_train = y[idx_train]
+				y_test  = y[idx_test]
 
-			x_train = x_train[idx_train]
-			x_test  = x_test[idx_test]
-
-			y_train = y_train[idx_train]
-			y_test  = y_test[idx_test]
+			else:
 			
+				with open(f'data/CIFAR10/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
+					idx_train = pickle.load(handle)
+
+				with open(f'data/CIFAR10/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
+					idx_test = pickle.load(handle)
+
+
+				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+				x_train, x_test                      = x_train/255.0, x_test/255.0
+
+				x_train = x_train[idx_train]
+				x_test  = x_test[idx_test]
+
+				y_train = y_train[idx_train]
+				y_test  = y_test[idx_test]
+				
 		else:
 
 			(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
@@ -137,16 +187,16 @@ class ManageDatasets():
 		return x_train, y_train, x_test, y_test
 
 
-	def select_dataset(self, dataset_name, n_clients, non_iid):
+	def select_dataset(self, dataset_name, n_clients, non_iid, Xnon_iid = False):
 
 		if dataset_name == 'MNIST':
-			return self.load_MNIST(n_clients, non_iid)
+			return self.load_MNIST(n_clients, non_iid, Xnon_iid)
 
 		elif dataset_name == 'CIFAR100':
 			return self.load_CIFAR100(n_clients, non_iid)
 
 		elif dataset_name == 'CIFAR10':
-			return self.load_CIFAR10(n_clients, non_iid)
+			return self.load_CIFAR10(n_clients, non_iid, Xnon_iid)
 
 		elif dataset_name == 'MotionSense':
 			return self.load_MotionSense()
