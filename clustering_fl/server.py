@@ -21,7 +21,7 @@ from flwr.common import (
 )
 
 from flwr.common.logger import log
-from flwr.server.client_manager import ClientManager
+from modified_client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from keras.layers import Input, Dense, Activation
@@ -59,25 +59,51 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     self.clustering_round = clustering_round
     self.dataset = dataset
 
+    self.acc = []
+
+    self.idx = list(np.zeros(n_clients))
+
     super().__init__(fraction_fit=1, 
 		    min_available_clients=self.n_clients, 
 		    min_fit_clients=self.n_clients, 
 		    min_evaluate_clients=self.n_clients)
     
     if dataset == 'MNIST':
+      #self.x_servidor = []
+
       (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
-      x_servidor = x_servidor[list(np.random.random_integers(1,60000, 1000))]
+      x_servidor = x_servidor[list(np.random.random_integers(1,60000-1, 1000))]
       self.x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28) 
+
+      #for i in range(10000):
+      #  self.x_servidor.append(np.random.normal(0, 1, 28*28))
+
+      #self.x_servidor = tf.convert_to_tensor(self.x_servidor)
 
     if dataset == 'CIFAR10':
       (x_servidor, _), (_, _) = tf.keras.datasets.cifar10.load_data()
-      self.x_servidor = x_servidor[list(np.random.random_integers(1,50000, 1000))]
+      self.x_servidor = x_servidor[list(np.random.random_integers(1,50000-1, 1000))]
       #self.x_servidor = x_servidor.reshape(x_servidor.shape[0] , 32*32) 
+
+    if dataset == 'MotionSense':
+      for cid in range(n_clients):
+        with open(f'data/motion_sense/{cid+1}_train.pickle', 'rb') as train_file:
+          if cid == 0:
+            train = pickle.load(train_file)   
+            train = train.sample(100)
+          else:
+             train = pd.concat([train, pickle.load(train_file).sample(100)],
+                                ignore_index=True, sort = False)
+            
+      train.drop('activity', axis=1, inplace=True)
+      train.drop('subject', axis=1, inplace=True)
+      train.drop('trial', axis=1, inplace=True)
+      self.x_servidor = train.values
         
-  global idx
+  #global idx
 
   def aggregate_fit(self, server_round, results, failures):
-    global idx  
+    #global idx  
 
     def create_model(self):
       input_shape = self.x_servidor.shape
@@ -105,7 +131,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
       lista_modelos['cids'].append(client_id)
 
-      idx_cluster = idx[int(client_id)]
+      idx_cluster = self.idx[int(client_id)]
       #print(idx)
       if str(idx_cluster) not in lista_modelos['models'].keys(): 
         lista_modelos['models'][str(idx_cluster)] = []
@@ -129,15 +155,17 @@ class NeuralMatch(fl.server.strategy.FedAvg):
 
     actvs = lista_last.copy()
 
-    matrix = np.zeros((len(actvs), len(actvs)))
 
-    for i , a in enumerate(actvs):
-      for j, b in enumerate(actvs):
+    if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
+      matrix = np.zeros((len(actvs), len(actvs)))
 
-        x = int(lista_modelos['cids'][i])
-        y = int(lista_modelos['cids'][j])
+      for i , a in enumerate(actvs):
+        for j, b in enumerate(actvs):
 
-        matrix[x][y] = cka(a, b)
+          x = int(lista_modelos['cids'][i])
+          y = int(lista_modelos['cids'][j])
+
+          matrix[x][y] = cka(a, b)
 
     # with weights
     #matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
@@ -149,12 +177,12 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     #print(matrix)
 
     if self.clustering:
-      if (server_round == self.clustering_round-1) or (server_round == self.clustering_round) or (server_round%50 == 0):
+      if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
         
         if self.n_clusters == 'Affinity':
-          idx = server_AffinityClustering(matrix)
+          self.idx = server_AffinityClustering(matrix)
         else:
-          idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
+          self.idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
                                   dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters, 
                                   server_round = server_round, cluster_round=self.clustering_round)
           ## for random clusters:
@@ -165,7 +193,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           #  unique = len(unique)
 
         with open(f'results/clusters_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.txt', 'a') as arq:
-          arq.write(f"{idx} - round{server_round}\n")
+          arq.write(f"{self.idx} - round{server_round}\n")
         
     #criar um for para cada cluster ter um modelo
     parameters_aggregated = {}
@@ -197,6 +225,10 @@ class NeuralMatch(fl.server.strategy.FedAvg):
             ]
         )
 
+        self.acc = list(range(self.n_clients))
+        for c, evaluate_res in results:
+           self.acc[int(c.cid)] = evaluate_res.metrics['accuracy']
+
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
 
@@ -207,7 +239,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         self, server_round, parameters, client_manager):
         """Configure the next round of training."""
         config = {}
-        global idx 
+        #global idx 
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
@@ -217,7 +249,13 @@ class NeuralMatch(fl.server.strategy.FedAvg):
             client_manager.num_available()
         )
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
+            num_clients=sample_size, min_num_clients=min_num_clients,
+            selection = 'POC',
+            idx = self.idx, 
+            server_round = server_round,
+            cluster_round = self.clustering_round,
+            POC_perc_of_clients = 0.5,
+            acc = self.acc
         )
         # Return client/config pairs
 
@@ -230,7 +268,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
            return [(client, fit_ins) for client in clients]
         
         else:
-          return [(client, FitIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
+          return [(client, FitIns(parameters[str(self.idx[int(client.cid)])], config)) for client in clients]
   
   def configure_evaluate(
       self, server_round, parameters, client_manager):
@@ -240,7 +278,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           return []
       # Parameters and config
       config = {}
-      global idx 
+      #global idx 
       if self.on_evaluate_config_fn is not None:
           # Custom evaluation config function provided
           config = self.on_evaluate_config_fn(server_round)
@@ -260,4 +298,4 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
         return [(client, evaluate_ins) for client in clients]      
       else:
-        return [(client, EvaluateIns(parameters[str(idx[int(client.cid)])], config)) for client in clients]
+        return [(client, EvaluateIns(parameters[str(self.idx[int(client.cid)])], config)) for client in clients]

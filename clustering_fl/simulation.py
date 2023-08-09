@@ -14,14 +14,36 @@ try:
 except FileNotFoundError:
 	pass
 
-dataset_name = 'MNIST'
-n_clients = 10
+import argparse
+
+#parser = argparse.ArgumentParser(description='Simulator for Task Scheduling in Vehicular Edge Computing ')
+#parser.add_argument("-a", "--dataset", dest="dataset", help="", metavar="DATASET")
+#parser.add_argument("-b", "--nclients", dest="nclients", default=10, help="", metavar="NCLIENTS")
+#parser.add_argument("-c", "--nrounds", dest="nrounds", default=1, help="", metavar="NROUNDS")
+#parser.add_argument("-d", "--nclusters", dest="nclusters", default=1, help="", metavar="NCLUSTERS")
+#parser.add_argument("-e", "--clustering", dest="clustering", default=3600, help="", metavar="CLUSTERING")
+#parser.add_argument("-f", "--clusterround", dest="clusterround", default=2000, help="", metavar="CLUSTEROUND")
+#parser.add_argument("-g", "--noniid", dest="noniid", default=1, help="", metavar="NONIID")
+#
+#options = parser.parse_args()
+
+dataset_name = 'MotionSense'
+n_clients = 24
 n_rounds = 15
-n_clusters = 10
+n_clusters = 1
 clustering = True
 cluster_round = 5
 non_iid = True
 Xnon_iid = False
+
+#dataset_name = options.dataset
+#n_clients = int(options.nclients)
+#n_rounds = 		int(options.nrounds)
+#n_clusters = 	int(options.nclusters)
+#clustering = 	options.clustering
+#cluster_round = int(options.clusterround)
+#non_iid = 		options.noniid
+
 
 def funcao_cliente(cid):
 	return ClientBase(int(cid), n_clients=n_clients,
@@ -40,3 +62,5 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+##python3 simulation.py --dataset MNIST --nclients 10 --nrounds 5 --nclusters 5 --clustering True --clusterround 2 --noniid True 
