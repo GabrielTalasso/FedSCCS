@@ -14,11 +14,11 @@ n_clusters = [1, 2, 5, 10, 'POC']
 
 path = './experiments/MNIST/noniid'
 #path = './experiments/MNIST/noniid'
-path = '/experiments/MotionSense'
+path = './experiments/MotionSense'
 
 for c in n_clusters:
     acc =  pd.read_csv(f'{path}/acc_{dataset}_{n_clients}clients_{c}clusters.csv',
-                       names=['_', 'client', 'acc', 'loss']).drop('_', axis = 1)
+                       names=['_', 'client', 'acc', 'loss'])
     if c==1:
         label_clusters = 'FedAvg'
     else:
@@ -27,7 +27,12 @@ for c in n_clusters:
     rounds = np.ones(n_clients)
     for r in range(2,n_rounds+1):
         rounds = np.concatenate((rounds, np.ones(n_clients)*r), axis = None)
+
+    if c == 'POC':
+        rounds = acc['_']
+        
     acc['round'] = rounds
+
 
     sns.lineplot(acc.groupby('round').mean(), y = 'acc', x = 'round', legend='brief', label=label_clusters)
 #plt.ylim(0.7, 1)

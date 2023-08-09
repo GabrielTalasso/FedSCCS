@@ -54,8 +54,6 @@ class ClientBase(fl.client.NumPyClient):
 		return self.model.get_weights()
 
 	def fit(self, parameters, config):
-		
-		print(config)
 
 		#config recebe parametros do servidor
 		self.model.set_weights(parameters)
@@ -78,7 +76,7 @@ class ClientBase(fl.client.NumPyClient):
 
 		
 		with open(f'results/acc_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
-			arquivo.write(f"{self.round}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
+			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 	 		
 
 

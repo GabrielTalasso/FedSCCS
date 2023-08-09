@@ -259,6 +259,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
         # Return client/config pairs
 
+        config = {"round" : server_round}
+
         if server_round == 1:
            fit_ins = FitIns(parameters, config)
            return [(client, fit_ins) for client in clients]
