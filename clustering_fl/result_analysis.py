@@ -10,7 +10,7 @@ n_rounds = 15
 n_clients = 24
 n_clusters = [1,2, 5,8, 'Affinity']
 n_clusters = [ 5, 10, 15]
-n_clusters = [1, 2, 5, 10, 'POC']
+n_clusters = [1, 2, 5, 10, 'POC', 'Affinity', '5RCS', '5KCENTER', '5KCENTER_random']
 
 path = './experiments/MNIST/noniid'
 #path = './experiments/MNIST/noniid'
@@ -28,14 +28,14 @@ for c in n_clusters:
     for r in range(2,n_rounds+1):
         rounds = np.concatenate((rounds, np.ones(n_clients)*r), axis = None)
 
-    if c == 'POC':
+    if c == 'POC' or c == '5RCS' or c == '5KCENTER_random':
         rounds = acc['_']
-        
+
     acc['round'] = rounds
 
 
     sns.lineplot(acc.groupby('round').mean(), y = 'acc', x = 'round', legend='brief', label=label_clusters)
-#plt.ylim(0.7, 1)
+plt.ylim(0.7, 0.82)
 plt.show()
 
 ## comparing with random clusters:

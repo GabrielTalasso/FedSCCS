@@ -30,7 +30,7 @@ import argparse
 dataset_name = 'MotionSense'
 n_clients = 24
 n_rounds = 15
-n_clusters = 1
+n_clusters = 5
 clustering = True
 cluster_round = 5
 non_iid = True
@@ -64,3 +64,8 @@ with open('./results/history_simulation.pickle', 'wb') as file:
 
 
 ##python3 simulation.py --dataset MNIST --nclients 10 --nrounds 5 --nclusters 5 --clustering True --clusterround 2 --noniid True 
+
+
+#escrever comandos sh
+#colocar novos params no init: sim_metric, clustering method, selection metrics
+#criar novas pastas para salvar resultados

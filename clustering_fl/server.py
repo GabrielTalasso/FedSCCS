@@ -185,6 +185,9 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           self.idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
                                   dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters, 
                                   server_round = server_round, cluster_round=self.clustering_round)
+          
+          self.idx = server_KCenterClustering(lista_last_layer, k = self.n_clusters)
+
           ## for random clusters:
           #unique = 0
           #while unique != self.n_clusters:
@@ -250,7 +253,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients,
-            selection = 'POC',
+            selection = 'Random',
             idx = self.idx, 
             server_round = server_round,
             cluster_round = self.clustering_round,
@@ -290,7 +293,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           client_manager.num_available()
       )
       clients = client_manager.sample(
-          num_clients=sample_size, min_num_clients=min_num_clients
+          num_clients=sample_size, min_num_clients=min_num_clients, 
+          selection = 'All'
       )
       if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)
