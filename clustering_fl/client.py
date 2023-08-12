@@ -75,7 +75,7 @@ class ClientBase(fl.client.NumPyClient):
 		self.round += 1
 
 		
-		with open(f'results/acc_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
+		with open(f'results/acc_train_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
 			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 	 		
 
@@ -93,6 +93,8 @@ class ClientBase(fl.client.NumPyClient):
 		self.model.set_weights(parameters)
 
 		loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
+		with open(f'results/acc_evaluate_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
+			arquivo.write(f"{config['round']}, {self.cid}, {accuracy}, {loss}\n")
 	
 	
 		return loss, len(self.x_test), {"accuracy" : accuracy}

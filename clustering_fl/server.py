@@ -253,7 +253,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients,
-            selection = 'Random',
+            selection = 'POC',
             idx = self.idx, 
             server_round = server_round,
             cluster_round = self.clustering_round,
@@ -282,7 +282,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       if self.fraction_evaluate == 0.0:
           return []
       # Parameters and config
-      config = {}
+      config = {'round': server_round}
       #global idx 
       if self.on_evaluate_config_fn is not None:
           # Custom evaluation config function provided

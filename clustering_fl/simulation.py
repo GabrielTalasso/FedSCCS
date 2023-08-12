@@ -28,11 +28,11 @@ import argparse
 #options = parser.parse_args()
 
 dataset_name = 'MotionSense'
-n_clients = 24
-n_rounds = 15
+n_clients = 12
+n_rounds = 5
 n_clusters = 5
 clustering = True
-cluster_round = 5
+cluster_round = 2
 non_iid = True
 Xnon_iid = False
 
