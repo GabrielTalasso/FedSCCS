@@ -11,6 +11,7 @@ from scipy.stats import wasserstein_distance
 import tensorflow as tf
 import numpy as np
 import random
+import os
 
 from dataset_utils import ManageDatasets
 from model_definition import ModelCreation
@@ -19,8 +20,10 @@ from sys import getsizeof
 
 class ClientBase(fl.client.NumPyClient):
 
-	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid, Xnon_iid,
-	      n_rounds, n_clusters):
+	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid, Xnon_iid, 
+	      n_rounds, n_clusters, selection_method, cluster_metric, 
+		  cluster_method, metric_layer = -1, 
+		  POC_perc_of_clients = 0.5):
 
 		self.cid = cid
 		self.round = 0
@@ -30,6 +33,12 @@ class ClientBase(fl.client.NumPyClient):
 		self.non_iid = non_iid
 		self.Xnon_iid = Xnon_iid
 		self.local_epochs = local_epochs
+
+		self.selection_method = selection_method
+		self.POC_perc_of_clients = POC_perc_of_clients
+		self.cluster_metric = cluster_metric
+		self.metric_layer = metric_layer
+		self.cluster_method = cluster_method
 
 		self.x_train, self.y_train, self.x_test, self.y_test = self.load_data()
 		self.model     = self.create_model()
@@ -79,6 +88,10 @@ class ClientBase(fl.client.NumPyClient):
 			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 	 		
 
+		filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/train/acc_{self.n_clients}clients_{self.n_clusters}clusters.csv"
+		os.makedirs(os.path.dirname(filename), exist_ok=True)
+		with open(filename, 'a') as arquivo:
+			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 
 		#acc = pd.read_csv('/content/acc.csv')		
 		#acc = acc.append({'cid':self.cid, 
@@ -93,7 +106,9 @@ class ClientBase(fl.client.NumPyClient):
 		self.model.set_weights(parameters)
 
 		loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
-		with open(f'results/acc_evaluate_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
+		filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/evaluate/acc_{self.n_clients}clients_{self.n_clusters}clusters.csv"
+		os.makedirs(os.path.dirname(filename), exist_ok=True)
+		with open(filename, 'a') as arquivo:
 			arquivo.write(f"{config['round']}, {self.cid}, {accuracy}, {loss}\n")
 	
 	

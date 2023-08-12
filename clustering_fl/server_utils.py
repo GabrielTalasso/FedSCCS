@@ -51,7 +51,7 @@ class GreedyKCenter(object):
         return np.sqrt(displacement.dot(displacement))
 
 def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters,
-                    server_round, cluster_round):
+                    server_round, cluster_round, path):
 
     pdist = spc.distance.pdist(matrix)
     linkage = spc.linkage(pdist, method='ward')
@@ -72,7 +72,9 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
     if plot_dendrogram and (server_round == cluster_round):
 
         dendrogram(linkage, color_threshold=th)
-        plt.savefig(f'results/clusters_{dataset}_{n_clients}clients_{n_clusters}clusters.png')
+        #plt.savefig(f'results/clusters_{dataset}_{n_clients}clients_{n_clusters}clusters.png')
+        plt.savefig(path+f'clusters_{n_clients}clients_{n_clusters}clusters.png')
+
     
 
     return idx

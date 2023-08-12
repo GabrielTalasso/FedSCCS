@@ -40,17 +40,20 @@ from model_definition import ModelCreation
 
 from sys import getsizeof
 
-n_clients = 25
-
 def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
     return layer_fn(input_data)
 
-idx = list(np.zeros(n_clients))
-
 class NeuralMatch(fl.server.strategy.FedAvg):
 
-  def __init__(self, model_name, n_clusters, n_clients, clustering, clustering_round, dataset, fraction_fit):
+  def __init__(self, model_name, n_clients,
+                clustering, clustering_round, dataset, 
+                fraction_fit, selection_method, cluster_metric,
+                cluster_method,
+                metric_layer = -1,
+                n_clusters = 1,
+                POC_perc_of_clients = 0.5
+                ):
 
     self.model_name = model_name
     self.n_clusters = n_clusters
@@ -58,6 +61,12 @@ class NeuralMatch(fl.server.strategy.FedAvg):
     self.clustering = clustering
     self.clustering_round = clustering_round
     self.dataset = dataset
+
+    self.selection_method = selection_method
+    self.POC_perc_of_clients = POC_perc_of_clients
+    self.cluster_metric = cluster_metric
+    self.metric_layer = metric_layer
+    self.cluster_method = cluster_method
 
     self.acc = []
 
@@ -146,56 +155,63 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       modelo.set_weights(w)#
       #modelo.predict(self.x_servidor)# 
 
-      activation_last = get_layer_outputs(modelo, modelo.layers[-2], self.x_servidor, 0)#
+      activation_last = get_layer_outputs(modelo, modelo.layers[self.metric_layer], self.x_servidor, 0)#
       lista_last.append(activation_last)#
-      lista_last_layer.append(modelo.layers[-1].weights[0].numpy().flatten())#
+      lista_last_layer.append(modelo.layers[self.metric_layer].weights[0].numpy().flatten())#
 
     lista_modelos['actv_last'] = lista_last.copy()
     lista_modelos['last_layer'] = lista_last_layer
 
     actvs = lista_last.copy()
 
+    if self.cluster_metric == 'CKA':
+      if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
+        matrix = np.zeros((len(actvs), len(actvs)))
 
-    if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
-      matrix = np.zeros((len(actvs), len(actvs)))
+        for i , a in enumerate(actvs):
+          for j, b in enumerate(actvs):
 
-      for i , a in enumerate(actvs):
-        for j, b in enumerate(actvs):
+            x = int(lista_modelos['cids'][i])
+            y = int(lista_modelos['cids'][j])
 
-          x = int(lista_modelos['cids'][i])
-          y = int(lista_modelos['cids'][j])
+            matrix[x][y] = cka(a, b)
 
-          matrix[x][y] = cka(a, b)
+    if self.cluster_metric == 'weights':
+      if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
+        matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
 
-    # with weights
-    #matrix = np.zeros((len(lista_last_layer), len(lista_last_layer)))
-    #for i , a in enumerate(lista_last_layer):
-    #  for j, b in enumerate(lista_last_layer):
-    #    x = int(lista_modelos['cids'][i])
-    #    y = int(lista_modelos['cids'][j])
-    #    matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
-    #print(matrix)
-
+        for i , a in enumerate(lista_last_layer):
+          for j, b in enumerate(lista_last_layer):
+            x = int(lista_modelos['cids'][i])
+            y = int(lista_modelos['cids'][j])
+            matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
+        
     if self.clustering:
+
       if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
         
-        if self.n_clusters == 'Affinity':
+        if self.cluster_method == 'Affinity':
           self.idx = server_AffinityClustering(matrix)
-        else:
+
+        elif self.cluster_method == 'HC':
           self.idx = server_Hclusters(matrix, self.n_clusters, plot_dendrogram=True,
                                   dataset = self.dataset, n_clients=self.n_clients, n_clusters=self.n_clusters, 
-                                  server_round = server_round, cluster_round=self.clustering_round)
+                                  server_round = server_round, cluster_round=self.clustering_round,
+                                  path = f'local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/')
           
+        if self.cluster_method == 'KCenter':
           self.idx = server_KCenterClustering(lista_last_layer, k = self.n_clusters)
 
-          ## for random clusters:
-          #unique = 0
-          #while unique != self.n_clusters:
-          #  idx = list(np.random.randint(0, self.n_clusters, self.n_clients))
-          #  unique = np.unique(np.array(idx))
-          #  unique = len(unique)
+        if self.cluster_method == 'Random':
+          unique = 0
+          while unique != self.n_clusters:
+            self.idx = list(np.random.randint(0, self.n_clusters, self.n_clients))
+            unique = np.unique(np.array(self.idx))
+            unique = len(unique)
 
-        with open(f'results/clusters_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.txt', 'a') as arq:
+        filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/clusters_{self.n_clients}clients_{self.n_clusters}clusters.txt"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'a') as arq:
           arq.write(f"{self.idx} - round{server_round}\n")
         
     #criar um for para cada cluster ter um modelo
@@ -253,11 +269,11 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         )
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients,
-            selection = 'POC',
+            selection = self.selection_method,
             idx = self.idx, 
             server_round = server_round,
             cluster_round = self.clustering_round,
-            POC_perc_of_clients = 0.5,
+            POC_perc_of_clients = self.POC_perc_of_clients,
             acc = self.acc
         )
         # Return client/config pairs
