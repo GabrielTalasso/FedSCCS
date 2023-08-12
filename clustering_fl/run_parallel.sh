@@ -2,61 +2,34 @@
 
 CORES=$1
 
-SCENARIO="cologne"
+DATASET="MotionSense"
 
-INTERVAL=5
+NCLIENTS=12
 
-BEGIN=100
+NROUNDS=5
 
-START_PROCESS=100
+NCLUSTERS="2 5"
 
-STEP_LENGHT=0.1
+CLUSTERING="True"
 
-RESOURCES_VCS=1
+CLUSTERROUND=2
 
-TOTAL_SEEDS="1 2 3 4 5"
+NONIID="True"
 
-SEED_SUMO=1
+SELECTIONMETHOD="All POC Random"
 
-TASK_RATE="1 2 3 4 5 10 15"
+CLUSTERMETRIC="CKA weights"
 
-TASK_SIZE=10
+METRICLAYER="-1 -2 1"
 
-CPU_CYCLE=30
+POCPERCOFCLIENTS=0.5
 
-SIMULATION_TIME=302
+CLUSTERMETHOD="KCenter Affinity HC Random"
 
-ALGORITHMS="FCFS RANDOM FARID FARIDNEW KIRA EFESTO NANCY TOVEC CRATOS"
-
-DEADLINES="0.5 0.8 1 3 5 7"
-
-# CORES=$1
-# INICIO=$2
-# FINAL=$3
-# ALGORITMOS="MARINA CRATOS FIFO UNC AHP PSO"
-
-# echo "VEC Simulation"
-# echo "* Inicio: $INICIO"
-# echo "* Final: $FINAL"
-# echo "* Numero de cores usados: $CORES"
-# echo "* Algoritmos: $ALGORITMOS"
-
-parallel --bar -j $CORES "python3 run.py \
---scenario {1} \
---interval {2} \
---tasks 10 \
---begin $BEGIN \
---end $SIMULATION_TIME \
---radius 2000 \
---resources {3} \
---weight {4} \
---taskrate {5} \
---cpucycle {6} \
---algorithm {7} \
---seed_sumo {8} \
---seed_task {9} \
---deadline {10} \
---startprocess {11} \
---steplenght {12}" ::: $SCENARIO ::: $INTERVAL ::: $RESOURCES_VCS ::: \
-$TASK_SIZE ::: $TASK_RATE ::: $CPU_CYCLE ::: \
-$ALGORITHMS ::: $SEED_SUMO ::: $TOTAL_SEEDS ::: $DEADLINES ::: $START_PROCESS ::: $STEP_LENGHT
+parallel --bar -j $CORES "python3 simulation.py --dataset {1} --nclients {2} \
+ --nrounds {3} --nclusters {4} --clustering {5} --clusterround {6} --noniid {7} \
+ --selectionmethod {8} --clustermetric {9} --metriclayer {10} --pocpercofclients {11} \
+ --clustermethod {12} " ::: $DATASET ::: $NCLIENTS ::: $NROUNDS ::: \
+ $NCLUSTERS ::: $CLUSTERING ::: $CLUSTERROUND ::: $NONIID :::\
+ $SELECTIONMETHOD ::: $CLUSTERMETRIC ::: $METRICLAYER :::\
+ $POCPERCOFCLIENTS ::: $CLUSTERMETHOD

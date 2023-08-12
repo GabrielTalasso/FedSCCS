@@ -16,38 +16,61 @@ except FileNotFoundError:
 
 import argparse
 
-#parser = argparse.ArgumentParser(description='Simulator for Task Scheduling in Vehicular Edge Computing ')
-#parser.add_argument("-a", "--dataset", dest="dataset", help="", metavar="DATASET")
-#parser.add_argument("-b", "--nclients", dest="nclients", default=10, help="", metavar="NCLIENTS")
-#parser.add_argument("-c", "--nrounds", dest="nrounds", default=1, help="", metavar="NROUNDS")
-#parser.add_argument("-d", "--nclusters", dest="nclusters", default=1, help="", metavar="NCLUSTERS")
-#parser.add_argument("-e", "--clustering", dest="clustering", default=3600, help="", metavar="CLUSTERING")
-#parser.add_argument("-f", "--clusterround", dest="clusterround", default=2000, help="", metavar="CLUSTEROUND")
-#parser.add_argument("-g", "--noniid", dest="noniid", default=1, help="", metavar="NONIID")
-#
-#options = parser.parse_args()
+parser = argparse.ArgumentParser(description='Simulator for Clustering in FL ')
+parser.add_argument("-a",  "--dataset", 			dest="dataset", help="", metavar="DATASET")
+parser.add_argument("-b",  "--nclients", 			dest="nclients", default=10, help="", metavar="NCLIENTS")
+parser.add_argument("-c",  "--nrounds", 			dest="nrounds", default=1, help="", metavar="NROUNDS")
+parser.add_argument("-d",  "--nclusters", 			dest="nclusters", default=1, help="", metavar="NCLUSTERS")
+parser.add_argument("-e",  "--clustering", 			dest="clustering", default=3600, help="", metavar="CLUSTERING")
+parser.add_argument("-f",  "--clusterround", 		dest="clusterround", default=2000, help="", metavar="CLUSTEROUND")
+parser.add_argument("-g",  "--noniid", 				dest="noniid", default=1, help="", metavar="NONIID")
+parser.add_argument("-a1", "--selectionmethod", 	dest="selectionmethod", default=1, help="", metavar="SELECTIONMETHOD")
+parser.add_argument("-b1", "--clustermetric", 		dest="clustermetric", default=1, help="", metavar="CLUSTERMETRIC")
+parser.add_argument("-c1", "--metriclayer", 		dest="metriclayer", default=1, help="", metavar="METRICLAYER")
+parser.add_argument("-d1", "--pocpercofclients", 	dest="pocpercofclients", default=1, help="", metavar="POCPERCOFCLIENTS")
+parser.add_argument("-e1", "--clustermethod", 		dest="clustermethod", default=1, help="", metavar="CLUSTERMETHOD")
 
-dataset_name = 'MotionSense'
-selection_method = 'Random' #Random, POC, All
-cluster_metric = 'weights' #CKA, weights
-metric_layer = -1 #-1, -2, 1
-cluster_method = 'KCenter' #Affinity, HC, KCenter, Random
-POC_perc_of_clients = 0.5
-n_clients = 12
-n_rounds = 5
-n_clusters = 5
-clustering = True
-cluster_round = 2
-non_iid = True
+options = parser.parse_args()
+
+#dataset_name = 'MotionSense'
+#selection_method = 'Random' #Random, POC, All
+#cluster_metric = 'weights' #CKA, weights
+#metric_layer = -1 #-1, -2, 1
+#cluster_method = 'KCenter' #Affinity, HC, KCenter, Random
+#POC_perc_of_clients = 0.5
+#n_clients = 12
+#n_rounds = 5
+#n_clusters = 5
+#clustering = True
+#cluster_round = 2
+#non_iid = True
 Xnon_iid = False
 
-#dataset_name = options.dataset
-#n_clients = int(options.nclients)
-#n_rounds = 		int(options.nrounds)
-#n_clusters = 	int(options.nclusters)
-#clustering = 	options.clustering
-#cluster_round = int(options.clusterround)
-#non_iid = 		options.noniid
+dataset_name = options.dataset
+n_clients = int(options.nclients)
+n_rounds = 		int(options.nrounds)
+n_clusters = 	int(options.nclusters)
+clustering = 	options.clustering
+cluster_round = int(options.clusterround)
+non_iid = 		options.noniid
+selection_method 	= options.selectionmethod   #'Random' #Random, POC, All
+cluster_metric 		= options.clustermetric   #'weights' #CKA, weights
+metric_layer 		= int(options.metriclayer)    #-1 #-1, -2, 1
+cluster_method		= options.clustermethod   #'KCenter' #Affinity, HC, KCenter, Random
+POC_perc_of_clients = float(options.pocpercofclients)  #0.5
+
+print(dataset_name) 
+print(n_clients)
+print(n_rounds) 
+print(n_clusters) 
+print(clustering) 
+print(cluster_round) 
+print(non_iid) 
+print(selection_method) 
+print(cluster_metric) 	
+print(metric_layer)
+print(cluster_method)
+print(POC_perc_of_clients) 
 
 
 def funcao_cliente(cid):
@@ -78,9 +101,4 @@ with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-##python3 simulation.py --dataset MNIST --nclients 10 --nrounds 5 --nclusters 5 --clustering True --clusterround 2 --noniid True 
-
-
-#escrever comandos sh
-#colocar novos params no init: sim_metric, clustering method, selection metrics
-#criar novas pastas para salvar resultados
+##python3 simulation.py --dataset MNIST --nclients 10 --nrounds 5 --nclusters 5 --clustering True --clusterround 2 --noniid True --selectionmethod All --clustermetric CKA --metriclayer -1 --clustermethod HC --pocpercofclients 0.5 
