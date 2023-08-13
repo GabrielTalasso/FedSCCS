@@ -3,6 +3,7 @@ from server import NeuralMatch
 import pickle
 import flwr as fl
 import os
+import sys
 
 try:
 	os.remove('./results/history_simulation.pickle')
@@ -59,18 +60,19 @@ metric_layer 		= int(options.metriclayer)    #-1 #-1, -2, 1
 cluster_method		= options.clustermethod   #'KCenter' #Affinity, HC, KCenter, Random
 POC_perc_of_clients = float(options.pocpercofclients)  #0.5
 
-print(dataset_name) 
-print(n_clients)
-print(n_rounds) 
-print(n_clusters) 
-print(clustering) 
-print(cluster_round) 
-print(non_iid) 
-print(selection_method) 
-print(cluster_metric) 	
-print(metric_layer)
-print(cluster_method)
-print(POC_perc_of_clients) 
+#verificacao de redundancia
+
+if (n_clusters != 2) and (cluster_method == 'Affinity'): 
+	#para o affinity não importa o numero de cluster, entao rodaremos apenas 1 vez (quando n_clusters == 2)
+	sys.exit()
+
+if (cluster_metric == 'CKA') and (cluster_method == 'KCenter'):
+	#o KCenter so funciona com os pesos, não é necessário rodar com o CKA
+	sys.exit()
+
+if (n_clusters == 1) and (cluster_method != 'HC'):
+	#quando o n_clusters = 1, temos o FedAvg e podemos roda-lo só uma vez (nesse caso escolhemos HC)
+	sys.exit()
 
 
 def funcao_cliente(cid):
