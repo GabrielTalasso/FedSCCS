@@ -1,3 +1,10 @@
-import numpy as np
+{C_1, C_2, ... , C_K} = clustering({c_1, c_2, ... , c_i})
 
-print(float('0.1'))
+for t in range(T):
+
+    for k in range(K):
+
+        for i in C_k:
+            w^i(t+1) = LocalUpdate(C_i)
+
+        w_k(t+1) = FedAvg(C_k)
