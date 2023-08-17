@@ -103,4 +103,9 @@ with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-##python3 simulation.py --dataset MNIST --nclients 10 --nrounds 5 --nclusters 5 --clustering True --clusterround 2 --noniid True --selectionmethod All --clustermetric CKA --metriclayer -1 --clustermethod HC --pocpercofclients 0.5 
+##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 5 --clustering True --clusterround 5 --noniid True --selectionmethod All --clustermetric CKA --metriclayer -1 --clustermethod HC --pocpercofclients 0.5
+##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 5 --clustering True --clusterround 5 --noniid True --selectionmethod Random --clustermetric weights --metriclayer -1 --clustermethod KCenter --pocpercofclients 0.5
+##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 1 --clustering True --clusterround 5 --noniid True --selectionmethod All --clustermetric weights --metriclayer -1 --clustermethod HC --pocpercofclients 0.5
+##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 5 --clustering True --clusterround 5 --noniid True --selectionmethod All --clustermetric weights --metriclayer -1 --clustermethod HC --pocpercofclients 0.5
+
+
