@@ -21,7 +21,6 @@ from flwr.common import (
 )
 
 from flwr.common.logger import log
-from modified_client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from keras.layers import Input, Dense, Activation
