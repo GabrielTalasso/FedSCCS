@@ -3,6 +3,9 @@ import keras
 from keras.models import Sequential
 from keras.layers import Conv1D, Conv2D, MaxPooling1D, Flatten, MaxPool2D, Dense, InputLayer, BatchNormalization, Dropout
 
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
 #from sklearn.linear_model import LogisticRegression
 import numpy as np
 
