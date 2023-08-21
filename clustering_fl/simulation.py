@@ -62,9 +62,9 @@ POC_perc_of_clients = float(options.pocpercofclients)  #0.5
 
 #verificacao de redundancia
 
-if (n_clusters != 2) and (cluster_method == 'Affinity'): 
+#if (n_clusters != 2) and (cluster_method == 'Affinity'): 
 	#para o affinity não importa o numero de cluster, entao rodaremos apenas 1 vez (quando n_clusters == 2)
-	sys.exit()
+	#sys.exit()
 
 if (cluster_metric == 'CKA') and (cluster_method == 'KCenter'):
 	#o KCenter so funciona com os pesos, não é necessário rodar com o CKA
@@ -72,6 +72,12 @@ if (cluster_metric == 'CKA') and (cluster_method == 'KCenter'):
 
 if (n_clusters == 1) and (cluster_method != 'HC'):
 	#quando o n_clusters = 1, temos o FedAvg e podemos roda-lo só uma vez (nesse caso escolhemos HC)
+	sys.exit()
+
+if (cluster_method == 'Random') and (metric_layer != -1):
+	sys.exit()
+
+if (cluster_method == 'Random') and (cluster_metric == 'weights'):
 	sys.exit()
 
 
@@ -107,5 +113,3 @@ with open('./results/history_simulation.pickle', 'wb') as file:
 ##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 5 --clustering True --clusterround 5 --noniid True --selectionmethod Random --clustermetric weights --metriclayer -1 --clustermethod KCenter --pocpercofclients 0.5
 ##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 1 --clustering True --clusterround 5 --noniid True --selectionmethod All --clustermetric weights --metriclayer -1 --clustermethod HC --pocpercofclients 0.5
 ##python3 simulation.py --dataset MotionSense --nclients 24 --nrounds 30 --nclusters 5 --clustering True --clusterround 5 --noniid True --selectionmethod All --clustermetric weights --metriclayer -1 --clustermethod HC --pocpercofclients 0.5
-
-
