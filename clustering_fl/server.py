@@ -102,6 +102,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
           else:
              train = pd.concat([train, pickle.load(train_file).sample(100)],
                                 ignore_index=True, sort = False)
+      
+      #self.x_servidor = np.random.normal(0, 1, size = (200, 7))
             
       train.drop('activity', axis=1, inplace=True)
       train.drop('subject', axis=1, inplace=True)
