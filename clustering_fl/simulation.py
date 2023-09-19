@@ -1,5 +1,5 @@
 from client import ClientBase
-from server import NeuralMatch
+from server import FedSCCS
 import pickle
 import flwr as fl
 import os
@@ -93,7 +93,7 @@ def funcao_cliente(cid):
 
 history = fl.simulation.start_simulation(client_fn=funcao_cliente, 
 								num_clients=n_clients, 
-								strategy=NeuralMatch(model_name='DNN',  n_clients = n_clients, 
+								strategy=FedSCCS(model_name='DNN',  n_clients = n_clients, 
 			     									clustering = clustering, clustering_round = cluster_round, 
 													n_clusters = n_clusters, dataset=dataset_name, fraction_fit=1, 
 													selection_method = selection_method, 

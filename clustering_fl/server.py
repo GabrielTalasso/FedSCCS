@@ -43,7 +43,7 @@ def get_layer_outputs(model, layer, input_data, learning_phase=1):
     layer_fn = K.function(model.input, layer.output)
     return layer_fn(input_data)
 
-class NeuralMatch(fl.server.strategy.FedAvg):
+class FedSCCS(fl.server.strategy.FedAvg):
 
   def __init__(self, model_name, n_clients,
                 clustering, clustering_round, dataset, 
@@ -109,7 +109,8 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       train.drop('subject', axis=1, inplace=True)
       train.drop('trial', axis=1, inplace=True)
       self.x_servidor = train.values
-        
+      self.x_servidor = np.random.uniform(0,1,size = (1000,7))
+      print('stop')
   #global idx
 
   def aggregate_fit(self, server_round, results, failures):
@@ -268,7 +269,7 @@ class NeuralMatch(fl.server.strategy.FedAvg):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
-        clients = client_manager.sample(
+        clients = sample(clients = client_manager.clients,
             num_clients=sample_size, min_num_clients=min_num_clients,
             selection = self.selection_method,
             idx = self.idx, 
@@ -311,7 +312,6 @@ class NeuralMatch(fl.server.strategy.FedAvg):
       )
       clients = client_manager.sample(
           num_clients=sample_size, min_num_clients=min_num_clients, 
-          selection = 'All'
       )
       if server_round == 1:
         evaluate_ins = EvaluateIns(parameters['0.0'], config)

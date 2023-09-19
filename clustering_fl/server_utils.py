@@ -5,6 +5,20 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 
+import numpy as np
+import random
+import threading
+import numpy as np
+import math
+from abc import ABC, abstractmethod
+from logging import INFO
+from typing import Dict, List, Optional
+
+from flwr.common.logger import log
+
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.criterion import Criterion
+
 from sklearn.cluster import AgglomerativeClustering
 import scipy.cluster.hierarchy as spc
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -134,3 +148,72 @@ def cka(X, Y):
 
     return (YTX ** 2).sum() / (np.sqrt((XTX ** 2).sum() * (YTY ** 2).sum()))
 
+def sample(
+    clients,
+    num_clients: int,
+    min_num_clients: Optional[int] = None,
+    criterion: Optional[Criterion] = None,
+    CL = True,
+    selection = None,
+    acc = None,
+    decay_factor = None,
+    server_round = None,
+    idx = None,
+    cluster_round = 0,
+    POC_perc_of_clients = 0.5):
+    
+
+    """Sample a number of Flower ClientProxy instances."""
+    # Block until at least num_clients are connected.
+    if min_num_clients is None:
+        min_num_clients = num_clients
+    # Sample clients which meet the criterion
+    available_cids = list(clients)
+    if criterion is not None:
+        available_cids = [
+            cid for cid in available_cids if criterion.select(clients[cid])
+        ]
+
+    if num_clients > len(available_cids):
+        log(
+            INFO,
+            "Sampling failed: number of available clients"
+            " (%s) is less than number of requested clients (%s).",
+            len(available_cids),
+            num_clients,
+        )
+        return []
+    
+    sampled_cids = available_cids.copy()
+                
+    
+    if (idx is not None) and (server_round>cluster_round) and CL:        
+       selected_clients = []
+       for cluster_idx in np.unique(idx): #passa por todos os clusters
+           cluster = []
+
+           for client in available_cids:
+               if idx[int(client)] == cluster_idx: #salva apenas os clientes pertencentes aquele cluster
+                   cluster.append(int(client))
+
+           if selection == 'Random':
+               selected_clients.append(str(random.sample(cluster,1)[0]))
+
+           if selection == 'POC':
+               acc_cluster = list(np.array(acc)[cluster]) 
+               sorted_cluster = [str(x) for _,x in sorted(zip(acc_cluster,cluster))]
+               #sorted_cluster.reverse()
+               clients2select        = max(int(float(len(cluster)) * float(POC_perc_of_clients)), 1)
+               for c in sorted_cluster[:clients2select]:
+                   selected_clients.append(c)
+
+           
+       sampled_cids = selected_clients.copy()
+
+    if selection == 'All':
+        sampled_cids = random.sample(available_cids, num_clients)  
+
+
+    
+
+    return [clients[cid] for cid in sampled_cids]
