@@ -160,7 +160,8 @@ def sample(
     server_round = None,
     idx = None,
     cluster_round = 0,
-    POC_perc_of_clients = 0.5):
+    POC_perc_of_clients = 0.5,
+    times_selected = []):
     
 
     """Sample a number of Flower ClientProxy instances."""
@@ -202,12 +203,24 @@ def sample(
            if selection == 'POC':
                acc_cluster = list(np.array(acc)[cluster]) 
                sorted_cluster = [str(x) for _,x in sorted(zip(acc_cluster,cluster))]
-               #sorted_cluster.reverse()
-               clients2select        = max(int(float(len(cluster)) * float(POC_perc_of_clients)), 1)
+               clients2select = max(int(float(len(cluster)) * float(POC_perc_of_clients)), 1)
                for c in sorted_cluster[:clients2select]:
-                   selected_clients.append(c)
+                    selected_clients.append(c)
 
-           
+           if selection == 'Less_Selected':
+            clients_to_select_in_cluster = []
+            c = [times_selected[i] for i in cluster]
+            number_less_selected = min(c)
+            #client_to_select = times_selected.index(number_less_selected)
+            client_to_select = list(pd.Series(times_selected)[pd.Series(times_selected) == number_less_selected].index)
+
+            for i in client_to_select: #if there are more than one with same times_selected
+                if i in cluster:
+                    clients_to_select_in_cluster.append(i)
+                
+            selected_clients.append(str(random.sample(clients_to_select_in_cluster,1)[0])) #select only one per cluster
+                
+                
        sampled_cids = selected_clients.copy()
 
     if selection == 'All':

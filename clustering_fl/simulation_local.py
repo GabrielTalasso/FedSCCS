@@ -16,7 +16,7 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'MotionSense'
-selection_method = 'All' #Random, POC, All
+selection_method = 'Less_Selected' #Random, POC, All
 cluster_metric = 'CKA' #CKA, weights
 metric_layer = -1 #-1, -2, 1
 cluster_method = 'HC' #Affinity, HC, KCenter, Random

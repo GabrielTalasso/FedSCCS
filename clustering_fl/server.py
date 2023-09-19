@@ -68,6 +68,7 @@ class FedSCCS(fl.server.strategy.FedAvg):
     self.cluster_method = cluster_method
 
     self.acc = []
+    self.times_selected = list(np.zeros(n_clients))
 
     self.idx = list(np.zeros(n_clients))
 
@@ -276,9 +277,12 @@ class FedSCCS(fl.server.strategy.FedAvg):
             server_round = server_round,
             cluster_round = self.clustering_round,
             POC_perc_of_clients = self.POC_perc_of_clients,
-            acc = self.acc
+            acc = self.acc,
+            times_selected=self.times_selected
         )
         # Return client/config pairs
+        for c in clients:
+           self.times_selected[int(c.cid)] += 1
 
         config = {"round" : server_round}
 
