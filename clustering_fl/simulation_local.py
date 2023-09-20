@@ -16,14 +16,14 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'MotionSense'
-selection_method = 'Less_Selected' #Random, POC, All
-cluster_metric = 'CKA' #CKA, weights
+selection_method = 'All' #Random, POC, All
+cluster_metric = 'weights' #CKA, weights
 metric_layer = -1 #-1, -2, 1
 cluster_method = 'HC' #Affinity, HC, KCenter, Random
 POC_perc_of_clients = 0.5
-n_clients = 24
+n_clients = 9
 n_rounds = 10
-n_clusters = 10
+n_clusters = 3
 clustering = True
 cluster_round = 2
 non_iid = True
@@ -53,8 +53,6 @@ history = fl.simulation.start_simulation(client_fn=funcao_cliente,
 													metric_layer = metric_layer,
 													cluster_method = cluster_method),
 								config=fl.server.ServerConfig(n_rounds))
-
-
 
 with open('./results/history_simulation.pickle', 'wb') as file:
     pickle.dump(history, file, protocol=pickle.HIGHEST_PROTOCOL)

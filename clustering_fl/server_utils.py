@@ -26,6 +26,9 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import OPTICS
 
+
+################# for clustering
+
 class GreedyKCenter(object):
     def fit(self, points, k):
         centers = []
@@ -64,7 +67,7 @@ class GreedyKCenter(object):
         displacement = u - v
         return np.sqrt(displacement.dot(displacement))
 
-def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters,
+def server_Hclusters(matrix, plot_dendrogram , n_clients, n_clusters,
                     server_round, cluster_round, path):
 
     pdist = spc.distance.pdist(matrix)
@@ -77,7 +80,7 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
     for i in np.linspace(min_link,max_link, 5000):
 
         le = len(pd.Series(spc.fcluster(linkage, i, 'distance' )).unique())
-        if le == k:
+        if le == n_clusters:
             th = i
 
     idx = spc.fcluster(linkage, th, 'distance' )
@@ -90,7 +93,6 @@ def server_Hclusters(matrix, k, plot_dendrogram , dataset, n_clients, n_clusters
         plt.savefig(path+f'clusters_{n_clients}clients_{n_clusters}clusters.png')
 
     
-
     return idx
 
 def server_Hclusters2(matrix, plot_dendrogram = False):
@@ -130,6 +132,35 @@ def server_KCenterClustering(weights, k):
     return idx
 
 
+def make_clusters(matrix, plot_dendrogram , n_clients, n_clusters,
+                    server_round, cluster_round, path, 
+                    clustering_method, models):
+    
+    if clustering_method == 'Affinity':
+        idx = server_AffinityClustering(matrix)
+        return idx
+
+    if clustering_method == 'HC':
+        idx = server_Hclusters(matrix = matrix, plot_dendrogram=plot_dendrogram,
+                                  n_clients=n_clients, n_clusters=n_clusters, 
+                                  server_round = server_round, cluster_round=cluster_round,
+                                  path = path)
+        return idx
+          
+    if clustering_method == 'KCenter':
+        idx = server_KCenterClustering(models, k = n_clusters)
+        return idx
+
+    if clustering_method == 'Random':
+        unique = 0
+        while unique != n_clusters:
+            idx = list(np.random.randint(0, n_clusters, n_clients))
+            unique = np.unique(np.array(idx))
+            unique = len(unique)
+        return idx
+
+
+####################### for similarity
 
 def cka(X, Y):
 
@@ -148,6 +179,36 @@ def cka(X, Y):
 
     return (YTX ** 2).sum() / (np.sqrt((XTX ** 2).sum() * (YTY ** 2).sum()))
 
+
+def calcule_similarity(models, metric):
+    actvs = models['actv_last']
+    if metric == 'CKA':
+        matrix = np.zeros((len(actvs), len(actvs)))
+
+        for i , a in enumerate(actvs):
+            for j, b in enumerate(actvs):
+
+                x = int(models['cids'][i])
+                y = int(models['cids'][j])
+
+                matrix[x][y] = cka(a, b)
+
+    last = models['last_layer']
+    if metric == 'weights':
+        matrix = np.zeros((len(last), len(last)))
+
+        for i , a in enumerate(last):
+            for j, b in enumerate(last):
+
+                x = int(models['cids'][i])
+                y = int(models['cids'][j])
+
+                matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
+
+    return matrix
+
+
+#################### for client selection
 def sample(
     clients,
     num_clients: int,
