@@ -26,6 +26,8 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import OPTICS
 
+import keras.backend as K
+
 
 ################# for clustering
 
@@ -162,6 +164,10 @@ def make_clusters(matrix, plot_dendrogram , n_clients, n_clusters,
 
 ####################### for similarity
 
+def get_layer_outputs(model, layer, input_data, learning_phase=1):
+    layer_fn = K.function(model.input, layer.output)
+    return layer_fn(input_data)
+
 def cka(X, Y):
 
     # Implements linear CKA as in Kornblith et al. (2019)
@@ -204,7 +210,6 @@ def calcule_similarity(models, metric):
                 y = int(models['cids'][j])
 
                 matrix[x][y] = np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)) #cos similarity
-
     return matrix
 
 

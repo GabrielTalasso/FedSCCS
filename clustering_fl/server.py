@@ -27,8 +27,6 @@ from keras.layers import Input, Dense, Activation
 from keras.models import Model
 import numpy as np
 import matplotlib.pyplot as plt
-import keras.backend as K
-
 from sklearn.metrics.pairwise import cosine_similarity
 
 import pandas as pd
@@ -38,10 +36,6 @@ from dataset_utils import ManageDatasets
 from model_definition import ModelCreation
 
 from sys import getsizeof
-
-def get_layer_outputs(model, layer, input_data, learning_phase=1):
-    layer_fn = K.function(model.input, layer.output)
-    return layer_fn(input_data)
 
 class FedSCCS(fl.server.strategy.FedAvg):
 
@@ -81,10 +75,6 @@ class FedSCCS(fl.server.strategy.FedAvg):
       (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
       x_servidor = x_servidor[list(np.random.random_integers(1,60000-1, 1000))]
       self.x_servidor = x_servidor.reshape(x_servidor.shape[0] , 28*28) 
-
-    if dataset == 'CIFAR10':
-      (x_servidor, _), (_, _) = tf.keras.datasets.cifar10.load_data()
-      self.x_servidor = x_servidor[list(np.random.random_integers(1,50000-1, 1000))]
 
     if dataset == 'MotionSense':
       for cid in range(n_clients):
@@ -126,23 +116,22 @@ class FedSCCS(fl.server.strategy.FedAvg):
 
       client_id = str(fit_res.metrics['cliente_id'])
       parametros_client = fit_res.parameters
-
       lista_modelos['cids'].append(client_id)
-
       idx_cluster = self.idx[int(client_id)]
 
+      #save model weights in clusters (or create a new cluster)
       if str(idx_cluster) not in lista_modelos['models'].keys(): 
         lista_modelos['models'][str(idx_cluster)] = []
       lista_modelos['models'][str(idx_cluster)].append(parameters_to_ndarrays(parametros_client))
       
+      #save model weights and the numer of examples in each client (to avg) in clusters 
       if str(idx_cluster) not in weights_results.keys():
           weights_results[str(idx_cluster)] = []
       weights_results[str(idx_cluster)].append((parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples))
 
-
+      #collect activations and weights of last-layer of clients's model (or any other layer difined in metric_layer)
       w = lista_modelos['models'][str(idx_cluster)][-1]#
       modelo.set_weights(w)#
-
       activation_last = get_layer_outputs(modelo, modelo.layers[self.metric_layer], self.x_servidor, 0)#
       lista_last.append(activation_last)#
       lista_last_layer.append(modelo.layers[self.metric_layer].weights[0].numpy().flatten())#
@@ -150,16 +139,21 @@ class FedSCCS(fl.server.strategy.FedAvg):
     lista_modelos['actv_last'] = lista_last.copy()
     lista_modelos['last_layer'] = lista_last_layer
 
+    #similarity between clients (construct the similatity matrix)
     if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
       matrix = calcule_similarity(models = lista_modelos, metric = self.cluster_metric)
         
+    #use some clustering method in similarity metrix
     if self.clustering:
       if (server_round == self.clustering_round-1) or (server_round == self.clustering_round):
-        self.idx = make_clusters(matrix = matrix, clustering_method=self.cluster_method,
+        self.idx = make_clusters(matrix = matrix,
+                                clustering_method = self.cluster_method,
                                 models = lista_last_layer,
                                 plot_dendrogram=True,
-                                n_clients=self.n_clients, n_clusters=self.n_clusters, 
-                                server_round = server_round, cluster_round=self.clustering_round,
+                                n_clients = self.n_clients,
+                                n_clusters=self.n_clusters, 
+                                server_round = server_round,
+                                cluster_round = self.clustering_round,
                                 path = f'local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/')
 
         filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/clusters_{self.n_clients}clients_{self.n_clusters}clusters.txt"
@@ -167,12 +161,12 @@ class FedSCCS(fl.server.strategy.FedAvg):
         with open(filename, 'a') as arq:
           arq.write(f"{self.idx} - round{server_round}\n")
         
+    #aggregation params for each cluster
     parameters_aggregated = {}
     for idx_cluster in weights_results.keys():   
       parameters_aggregated[idx_cluster] = ndarrays_to_parameters(aggregate(weights_results[idx_cluster]))
 
     metrics_aggregated = {}
-
     return parameters_aggregated, metrics_aggregated
 
   def aggregate_evaluate(
@@ -210,6 +204,8 @@ class FedSCCS(fl.server.strategy.FedAvg):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
+
+        #select clients 
         clients = sample(clients = client_manager.clients,
             num_clients=sample_size, min_num_clients=min_num_clients,
             selection = self.selection_method,
