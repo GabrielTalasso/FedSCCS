@@ -2,13 +2,13 @@
 
 CORES=$1
 
-DATASET="MotionSense"
+DATASET="MNIST"
 
-NCLIENTS=24
+NCLIENTS=50
 
 NROUNDS=100
 
-NCLUSTERS="1 2 5 10 20"
+NCLUSTERS="1 5 10 20 50"
 
 CLUSTERING="True"
 
@@ -20,11 +20,11 @@ SELECTIONMETHOD="All POC Random"
 
 CLUSTERMETRIC="CKA weights"
 
-METRICLAYER="-1 -2 1"
+METRICLAYER="-1"
 
 POCPERCOFCLIENTS=0.5
 
-CLUSTERMETHOD="Affinity"
+CLUSTERMETHOD="HC Random KCenter"
 
 parallel --bar -j $CORES "python3 simulation.py --dataset {1} --nclients {2} \
  --nrounds {3} --nclusters {4} --clustering {5} --clusterround {6} --noniid {7} \
