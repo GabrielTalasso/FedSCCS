@@ -11,94 +11,65 @@ from scipy.stats import wasserstein_distance
 import tensorflow as tf
 import numpy as np
 import random
+import os
 
-## onde colocar o datapath e x_servidor?? (arrumar tambem no servidor)
-data_path = './data'
-local_epochs = 2
-n_clients = 10
+from dataset_utils import ManageDatasets
+from model_definition import ModelCreation
 
+from sys import getsizeof
 
 class ClientBase(fl.client.NumPyClient):
 
-	def __init__(self, cid):
+	def __init__(self, cid, dataset, n_clients, model_name, local_epochs, non_iid, Xnon_iid, 
+	      n_rounds, n_clusters, selection_method, cluster_metric, 
+		  cluster_method, metric_layer = -1, 
+		  POC_perc_of_clients = 0.5):
 
 		self.cid = cid
+		self.round = 0
+		self.n_clients = n_clients
+		self.dataset = dataset
+		self.model_name = model_name
+		self.non_iid = non_iid
+		self.Xnon_iid = Xnon_iid
+		self.local_epochs = local_epochs
+
+		self.selection_method = selection_method
+		self.POC_perc_of_clients = POC_perc_of_clients
+		self.cluster_metric = cluster_metric
+		self.metric_layer = metric_layer
+		self.cluster_method = cluster_method
+
 		self.x_train, self.y_train, self.x_test, self.y_test = self.load_data()
 		self.model     = self.create_model()
-		self.round = 0
-		#print('++++++++++++++++++++++++++')
+
+		self.n_rounds = n_rounds
+		self.n_clusters = n_clusters
 
 	def load_data(self):
-		#with open(f'{data_path}/client{self.cid+1}.csv', 'rb') as train_file:
-		#	data = pd.read_csv(train_file).drop('Unnamed: 0', axis = 1).sample(1200, replace=True) #numero de imagens limitadas por conta de problema na memoria
-		#	train = data[0:1000]
-		#	test = data[1000:]
-	    #
-		##with open(f'{data_path}/mnist_test.csv', 'rb') as test_file: 	 
-		##	test = pd.read_csv(test_file, dtype = np.float32)
-		##	test = test.rename({'7': 'label'}, axis = 1)
-	    #   
-		#y_train = train['label'].values
-		#train.drop('label', axis=1, inplace=True)
-		## train.drop('subject', axis=1, inplace=True)
-		## train.drop('trial', axis=1, inplace=True)
-		#x_train = train.values
-		#y_test = test['label'].values
-		#test.drop('label', axis=1, inplace=True)
-		## test.drop('subject', axis=1, inplace=True)
-		## test.drop('trial', axis=1, inplace=True)
-		#x_test = test.values
-
-		with open(f'./data/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as file:
-			(x_train, y_train), (_, _) = tf.keras.datasets.mnist.load_data()
-			f = pickle.load(file)
-			x_train = x_train[f]
-			x_train = x_train.reshape(x_train.shape[0] , 28*28)
-			y_train = y_train[f]
-
-		with open(f'./data/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as file:
-			(_ , _), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-			f = pickle.load(file)
-			x_test = x_test[f]
-			x_test = x_test.reshape(x_test.shape[0] , 28*28)
-			#print(x_train.shape)
-			y_test = y_test[f]
-
-	    
-		return x_train, y_train, x_test, y_test
+		return ManageDatasets(self.cid).select_dataset(self.dataset, self.n_clients, self.non_iid, self.Xnon_iid)
 
 	def create_model(self):
-		model = tf.keras.models.Sequential()
+		input_shape = self.x_train.shape
 
-		model.add(tf.keras.layers.Flatten(input_shape=(784, )))
+		if self.model_name == 'DNN':
+			return ModelCreation().create_DNN(input_shape, 10)
 
-		model.add(tf.keras.layers.Dense(128, activation='relu'))
-	
-		model.add(tf.keras.layers.Dense(128, activation='tanh'))
-	
-		model.add(tf.keras.layers.Dense(128, activation='elu'))
-	
-		model.add(tf.keras.layers.Dense(128, activation='relu',))
-	
-		model.add(tf.keras.layers.Dense(10, activation='softmax'))
-
-		model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-		return model
+		elif self.model_name == 'CNN':
+			return ModelCreation().create_CNN(input_shape, 10)
+		
 
 	def get_parameters(self, config):
 		return self.model.get_weights()
 
 	def fit(self, parameters, config):
-		
-		print(config)
 
 		#config recebe parametros do servidor
 		self.model.set_weights(parameters)
 		h = self.model.fit(self.x_train, self.y_train, 
-		                                validation_data = (self.x_test, self.y_test),
-																		verbose=1, epochs=local_epochs)
+		                    validation_data = (self.x_test, self.y_test),
+							verbose=1, epochs=self.local_epochs)
 
-	
 		# '''
 		# adicionar metodos
 		# metricas
@@ -111,11 +82,16 @@ class ClientBase(fl.client.NumPyClient):
 				# "ativacoes" : var_ativacoes
 		}
 		self.round += 1
-		with open('results/acc.csv', 'a') as arquivo:
 
-			arquivo.write(f"{self.round}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
-	 
+		
+		with open(f'results/acc_train_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
+			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
+	 		
 
+		filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/train/acc_{self.n_clients}clients_{self.n_clusters}clusters.csv"
+		os.makedirs(os.path.dirname(filename), exist_ok=True)
+		with open(filename, 'a') as arquivo:
+			arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 
 		#acc = pd.read_csv('/content/acc.csv')		
 		#acc = acc.append({'cid':self.cid, 
@@ -130,6 +106,10 @@ class ClientBase(fl.client.NumPyClient):
 		self.model.set_weights(parameters)
 
 		loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
+		filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/evaluate/acc_{self.n_clients}clients_{self.n_clusters}clusters.csv"
+		os.makedirs(os.path.dirname(filename), exist_ok=True)
+		with open(filename, 'a') as arquivo:
+			arquivo.write(f"{config['round']}, {self.cid}, {accuracy}, {loss}\n")
 	
 	
 		return loss, len(self.x_test), {"accuracy" : accuracy}
