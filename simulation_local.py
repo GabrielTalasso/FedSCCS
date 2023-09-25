@@ -15,13 +15,13 @@ try:
 except FileNotFoundError:
 	pass
 
-dataset_name = 'MNIST'
+dataset_name = 'Motion_Sense'
 selection_method = 'All' #Random, POC, All
 cluster_metric = 'CKA' #CKA, weights
 metric_layer = -1 #-1, -2, 1
 cluster_method = 'HC' #Affinity, HC, KCenter, Random
 POC_perc_of_clients = 0.5
-n_clients = 25
+n_clients = 24
 n_rounds = 25
 n_clusters = 5
 clustering = True
