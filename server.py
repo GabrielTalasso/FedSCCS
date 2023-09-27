@@ -73,6 +73,7 @@ class FedSCCS(fl.server.strategy.FedAvg):
     
     if dataset == 'MNIST':
       (x_servidor, _), (_, _) = tf.keras.datasets.mnist.load_data()
+      x_servidor = x_servidor/255.0
       x_servidor = x_servidor[list(np.random.random_integers(1,60000-1, 1000))]
       self.x_servidor = x_servidor#.reshape(x_servidor.shape[0] , 28*28) 
 
