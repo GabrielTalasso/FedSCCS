@@ -66,16 +66,16 @@ class ManageDatasets():
 
 				with open(f'data/MNIST/Xnon_iid/{n_clients}/idx_train_{self.cid}.pickle', 'rb') as handle:
 					idx_train = pickle.load(handle)
-					idx_train = np.random.choice(idx_train, int(len(idx_train)*0.01))
+					#idx_train = np.random.choice(idx_train, int(len(idx_train)*0.01))
 
 				with open(f'data/MNIST/Xnon_iid/{n_clients}/idx_test_{self.cid}.pickle', 'rb') as handle:
 					idx_test = pickle.load(handle)
-					idx_test = np.random.choice(idx_test, int(len(idx_test)*0.01))
+					#idx_test = np.random.choice(idx_test, int(len(idx_test)*0.01))
 
-				idx_train = idx_train[int(self.cid)]
-				idx_test = idx_test[int(self.cid)]
+				#idx_train = idx_train[int(self.cid)]
+				#idx_test = idx_test[int(self.cid)]
 			
-				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+				(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 				x_train, x_test                      = x_train/255.0, x_test/255.0
 
 				x = np.concatenate([x_train, x_test], axis=0)
