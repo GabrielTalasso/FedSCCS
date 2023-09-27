@@ -27,7 +27,7 @@ n_clusters = 5
 clustering = True
 cluster_round = 5
 non_iid = True
-Xnon_iid = False
+Xnon_iid = True
 
 #verificacao de redundancia
 
