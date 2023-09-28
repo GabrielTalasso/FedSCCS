@@ -45,7 +45,7 @@ options = parser.parse_args()
 #clustering = True
 #cluster_round = 2
 #non_iid = True
-Xnon_iid = True
+Xnon_iid = False
 
 dataset_name = options.dataset
 n_clients = int(options.nclients)
