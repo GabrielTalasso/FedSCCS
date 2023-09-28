@@ -91,7 +91,7 @@ class FedSCCS(fl.server.strategy.FedAvg):
       train.drop('subject', axis=1, inplace=True)
       train.drop('trial', axis=1, inplace=True)
       self.x_servidor = train.values
-      self.x_servidor = np.random.uniform(0,1,size = (1000,7))
+      #self.x_servidor = np.random.uniform(0,1,size = (1000,7))
 
   def aggregate_fit(self, server_round, results, failures):
 
