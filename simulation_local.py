@@ -16,7 +16,7 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'ExtraSensory'
-selection_method = 'All' #Random, POC, All
+selection_method = 'All' #Random, POC, All, Less_Selected
 cluster_metric = 'CKA' #CKA, weights
 metric_layer = -1 #-1, -2, 1
 cluster_method = 'HC' #Affinity, HC, KCenter, Random
@@ -30,8 +30,6 @@ non_iid = True
 Xnon_iid = True
 
 #verificacao de redundancia
-
-
 def funcao_cliente(cid):
 	return ClientBase(int(cid), n_clients=n_clients,
 		    dataset=dataset_name, non_iid=non_iid, model_name = 'DNN',
