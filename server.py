@@ -93,6 +93,11 @@ class FedSCCS(fl.server.strategy.FedAvg):
       self.x_servidor = train.values
       #self.x_servidor = np.random.uniform(0,1,size = (1000,7))
 
+    if dataset == 'ExtraSensory':
+      with open(f'data/ExtraSensory/x_train_client_{60}.pickle', 'rb') as x_train_file:
+        x_train = pickle.load(x_train_file)
+      self.x_servidor = x_train[:100]
+
   def aggregate_fit(self, server_round, results, failures):
 
     def create_model(self):

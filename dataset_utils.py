@@ -34,16 +34,16 @@ class ManageDatasets():
 		return x_train, y_train, x_test, y_test
 	
 	def load_ExtraSensory(self):
-		with open(f'Client/data/ExtraSensory/x_train_client_{self.cid+1}.pickle', 'rb') as x_train_file:
+		with open(f'data/ExtraSensory/x_train_client_{self.cid+1}.pickle', 'rb') as x_train_file:
 			x_train = pickle.load(x_train_file)
 
-		with open(f'Client/data/ExtraSensory/x_test_client_{self.cid+1}.pickle', 'rb') as x_test_file:
+		with open(f'data/ExtraSensory/x_test_client_{self.cid+1}.pickle', 'rb') as x_test_file:
 			x_test = pickle.load(x_test_file)
 	    
-		with open(f'Client/data/ExtraSensory/y_train_client_{self.cid+1}.pickle', 'rb') as y_train_file:
+		with open(f'data/ExtraSensory/y_train_client_{self.cid+1}.pickle', 'rb') as y_train_file:
 			y_train = pickle.load(y_train_file)
 
-		with open(f'Client/data/ExtraSensory/y_test_client_{self.cid+1}.pickle', 'rb') as y_test_file:
+		with open(f'data/ExtraSensory/y_test_client_{self.cid+1}.pickle', 'rb') as y_test_file:
 			y_test = pickle.load(y_test_file)
 
 		y_train = np.array(y_train) + 1

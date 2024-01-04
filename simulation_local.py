@@ -5,6 +5,9 @@ import flwr as fl
 import os
 import sys
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+
 try:
 	os.remove('./results/history_simulation.pickle')
 except FileNotFoundError:
@@ -23,7 +26,7 @@ cluster_method = 'HC' #Affinity, HC, KCenter, Random
 POC_perc_of_clients = 0.5
 n_clients = 60
 n_rounds = 10
-n_clusters = 10
+n_clusters = 50
 clustering = True
 cluster_round = 5
 non_iid = True
