@@ -33,6 +33,25 @@ class ManageDatasets():
 		x_test = test.values
 
 		return x_train, y_train, x_test, y_test
+	
+	def load_ExtraSensory(self):
+		with open(f'Client/data/ExtraSensory/x_train_client_{self.cid+1}.pickle', 'rb') as x_train_file:
+			x_train = pickle.load(x_train_file)
+
+		with open(f'Client/data/ExtraSensory/x_test_client_{self.cid+1}.pickle', 'rb') as x_test_file:
+			x_test = pickle.load(x_test_file)
+	    
+		with open(f'Client/data/ExtraSensory/y_train_client_{self.cid+1}.pickle', 'rb') as y_train_file:
+			y_train = pickle.load(y_train_file)
+
+		with open(f'Client/data/ExtraSensory/y_test_client_{self.cid+1}.pickle', 'rb') as y_test_file:
+			y_test = pickle.load(y_test_file)
+
+		y_train = np.array(y_train) + 1
+		#print('------------------------------', len(y_train), np.max(y_train))
+		y_test  = np.array(y_test) + 1
+
+		return x_train, y_train, x_test, y_test
 
 
 	def load_MotionSense(self):
@@ -198,6 +217,9 @@ class ManageDatasets():
 
 		elif dataset_name == 'MotionSense':
 			return self.load_MotionSense()
+		
+		elif dataset_name == 'ExtraSensory':
+			return self.load_ExtraSensory()
 
 		elif dataset_name == 'UCIHAR':
 			return self.load_UCIHAR()
