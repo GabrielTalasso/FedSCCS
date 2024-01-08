@@ -82,12 +82,10 @@ class ClientBase(fl.client.NumPyClient):
 				# "ativacoes" : var_ativacoes
 		}
 		self.round += 1
-
-		
+	
 		#with open(f'results/acc_train_{self.dataset}_{self.n_clients}clients_{self.n_clusters}clusters.csv', 'a') as arquivo:
 		#	arquivo.write(f"{config['round']}, {self.cid}, {np.mean(h.history['accuracy'])}, {np.mean(h.history['loss'])}\n")
 	 		
-
 		filename = f"local_logs/{self.dataset}/{self.cluster_metric}-({self.metric_layer})-{self.cluster_method}-{self.selection_method}-{self.POC_perc_of_clients}/train/acc_{self.n_clients}clients_{self.n_clusters}clusters.csv"
 		os.makedirs(os.path.dirname(filename), exist_ok=True)
 		with open(filename, 'a') as arquivo:
