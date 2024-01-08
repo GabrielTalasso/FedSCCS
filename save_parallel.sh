@@ -2,11 +2,11 @@
 
 DATASET="ExtraSensory"
 
-NCLIENTS=30
+NCLIENTS=60
 
-NROUNDS=20
+NROUNDS=50
 
-NCLUSTERS="10"
+NCLUSTERS="1 10 20 30 50"
 
 CLUSTERING="True"
 
@@ -14,17 +14,17 @@ CLUSTERROUND=5
 
 NONIID="True"
 
-SELECTIONMETHOD="Less_Selected DEEV"
+SELECTIONMETHOD="All POC Random Less_Selected DEEV"
 
-CLUSTERMETRIC="CKA"
+CLUSTERMETRIC="CKA weights"
 
 METRICLAYER="-1"
 
 POCPERCOFCLIENTS=0.5
 
-CLUSTERMETHOD="HC"
+CLUSTERMETHOD="HC Random KCenter"
 
-parallel  -j1 --bar "python3 simulation.py --dataset {1} --nclients {2} \
+parallel  -j4 --bar "python3 simulation.py --dataset {1} --nclients {2} \
  --nrounds {3} --nclusters {4} --clustering {5} --clusterround {6} --noniid {7} \
  --selectionmethod {8} --clustermetric {9} --metriclayer {10} --pocpercofclients {11} \
  --clustermethod {12} " ::: $DATASET ::: $NCLIENTS ::: $NROUNDS ::: \

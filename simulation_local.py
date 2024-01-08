@@ -19,16 +19,16 @@ except FileNotFoundError:
 	pass
 
 dataset_name = 'ExtraSensory'
-selection_method = 'All' #Random, POC, All, Less_Selected
+selection_method = 'Less_Selected' #Random, POC, All, Less_Selected
 cluster_metric = 'CKA' #CKA, weights
 metric_layer = -1 #-1, -2, 1
 cluster_method = 'HC' #Affinity, HC, KCenter, Random
 POC_perc_of_clients = 0.5
-n_clients = 60
+n_clients = 20
 n_rounds = 10
-n_clusters = 50
+n_clusters = 5
 clustering = True
-cluster_round = 5
+cluster_round = 2
 non_iid = True
 Xnon_iid = True
 

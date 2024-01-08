@@ -255,39 +255,50 @@ def sample(
                 
     
     if (idx is not None) and (server_round>cluster_round) and CL:        
-       selected_clients = []
-       for cluster_idx in np.unique(idx): #passa por todos os clusters
-           cluster = []
+        selected_clients = []
+        for cluster_idx in np.unique(idx): #passa por todos os clusters
+            cluster = []
 
-           for client in available_cids:
+            for client in available_cids:
                if idx[int(client)] == cluster_idx: #salva apenas os clientes pertencentes aquele cluster
                    cluster.append(int(client))
 
-           if selection == 'Random':
+            if selection == 'Random':
                selected_clients.append(str(random.sample(cluster,1)[0]))
 
-           if selection == 'POC':
+            if selection == 'POC':
                acc_cluster = list(np.array(acc)[cluster]) 
                sorted_cluster = [str(x) for _,x in sorted(zip(acc_cluster,cluster))]
                clients2select = max(int(float(len(cluster)) * float(POC_perc_of_clients)), 1)
                for c in sorted_cluster[:clients2select]:
                     selected_clients.append(c)
 
-           if selection == 'Less_Selected':
-            clients_to_select_in_cluster = []
-            c = [times_selected[i] for i in cluster]
-            number_less_selected = min(c)
-            #client_to_select = times_selected.index(number_less_selected)
-            client_to_select = list(pd.Series(times_selected)[pd.Series(times_selected) == number_less_selected].index)
+            if selection == 'Less_Selected':
+                clients_to_select_in_cluster = []
+                c = [times_selected[i] for i in cluster]
+                number_less_selected = min(c)
+                #client_to_select = times_selected.index(number_less_selected)
+                client_to_select = list(pd.Series(times_selected)[pd.Series(times_selected) == number_less_selected].index)
+                selected_clients.append(str(client_to_select[0]))
 
-            for i in client_to_select: #if there are more than one with same times_selected
-                if i in cluster:
-                    clients_to_select_in_cluster.append(i)
+            if selection == 'DEEV' and server_round>1:
+                acc_cluster = list(np.array(acc)[cluster]) 
+                for idx_accuracy in range(len(acc_cluster)):
+                    if acc_cluster[idx_accuracy] < np.mean(np.array(acc_cluster)):
+                        selected_clients.append(str(available_cids[idx_accuracy]))
+
+                if decay_factor > 0:
+                    the_chosen_ones  = len(selected_clients) * (1 - decay_factor)**int(server_round)
+                    selected_clients = selected_clients[ : math.ceil(the_chosen_ones)]
                 
-            selected_clients.append(str(random.sample(clients_to_select_in_cluster,1)[0])) #select only one per cluster
+
+            # for i in client_to_select: #if there are more than one with same times_selected
+            #     if i in cluster:
+            #         clients_to_select_in_cluster.append(i)
+            # selected_clients.append(str(random.sample(clients_to_select_in_cluster,1)[0])) #select only one per cluster
                 
                 
-       sampled_cids = selected_clients.copy()
+        sampled_cids = selected_clients.copy()
 
     if selection == 'All':
         sampled_cids = random.sample(available_cids, num_clients)  
