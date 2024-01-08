@@ -46,7 +46,7 @@ class FedSCCS(fl.server.strategy.FedAvg):
                 metric_layer = -1,
                 n_clusters = 1,
                 POC_perc_of_clients = 0.5,
-                decay_factor = 0.5
+                decay_factor = 0.1
                 ):
 
     self.model_name = model_name
