@@ -19,11 +19,6 @@ with open(file_path, "rb") as f:
 
 pdist = spc.distance.pdist(ckas)
 linkage = spc.linkage(pdist, method='ward')
-#idx = spc.fcluster(linkage, 1.8, 'distance' )
-#print(idx)
-
-#dendrogram(linkage, color_threshold=1.8)
-#plt.show()
 
 min_link = linkage[0][2]
 max_link = linkage[-1][2]
@@ -38,9 +33,6 @@ for i in np.linspace(min_link,max_link, 5000):
 
 idx = spc.fcluster(linkage, th, 'distance' )
 print(idx)
-#dendrogram(linkage, color_threshold=th)
-#plt.show()
-
 
 af = AffinityPropagation(random_state=0).fit(1 / ckas)
 cluster_centers_indices = af.cluster_centers_indices_
@@ -65,4 +57,3 @@ from sklearn.manifold import TSNE
 tsne = TSNE(n_components=3, learning_rate='auto', init='random', perplexity=30).fit_transform(ckas)
 sns.scatterplot(x = tsne[:,0], y = tsne[:,1], hue = idx, palette='tab10')
 sns.set_theme(style='white')
-#plt.show()
